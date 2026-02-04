@@ -17,12 +17,32 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun RegisterScreen() {
 
+    // Estados de los campos
+    var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    // Dropdown Especialidad
+    var especialidadSeleccionada by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+
+    val especialidades = listOf(
+        "Electricista",
+        "Plomero",
+        "Carpintero",
+        "Albañil",
+        "Pintor",
+        "Jardinero"
+    )
+
+    // Control del modal
+    var mostrarDialogo by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text("Crear Cuenta")
-                },
+                title = { Text("Crear Cuenta") },
                 navigationIcon = {
                     IconButton(onClick = { }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
@@ -52,8 +72,8 @@ fun RegisterScreen() {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = nombre,
+                onValueChange = { nombre = it },
                 label = { Text("Nombre Completo") },
                 placeholder = { Text("Ej. Juan Pérez") },
                 trailingIcon = {
@@ -63,8 +83,8 @@ fun RegisterScreen() {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = correo,
+                onValueChange = { correo = it },
                 label = { Text("Correo Electrónico") },
                 placeholder = { Text("nombre@ejemplo.com") },
                 trailingIcon = {
@@ -74,8 +94,8 @@ fun RegisterScreen() {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = telefono,
+                onValueChange = { telefono = it },
                 label = { Text("Teléfono") },
                 placeholder = { Text("+502 0000 0000") },
                 trailingIcon = {
@@ -85,8 +105,8 @@ fun RegisterScreen() {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = password,
+                onValueChange = { password = it },
                 label = { Text("Contraseña") },
                 placeholder = { Text("********") },
                 trailingIcon = {
@@ -95,18 +115,42 @@ fun RegisterScreen() {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                label = { Text("Especialidad") },
-                placeholder = { Text("Selecciona tu oficio") },
-                trailingIcon = {
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+            // DROPDOWN DE ESPECIALIDAD
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                OutlinedTextField(
+                    value = especialidadSeleccionada,
+                    onValueChange = {},
+                    label = { Text("Especialidad") },
+                    placeholder = { Text("Selecciona tu oficio") },
+                    readOnly = true,
+                    trailingIcon = {
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
 
-            // Sección de subir archivo (simulación visual)
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    especialidades.forEach { opcion ->
+                        DropdownMenuItem(
+                            text = { Text(opcion) },
+                            onClick = {
+                                especialidadSeleccionada = opcion
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Simulación subida archivo
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -132,7 +176,20 @@ fun RegisterScreen() {
             }
 
             Button(
-                onClick = { },
+                onClick = {
+
+                    // Mostrar datos en consola
+                    println("===== DATOS REGISTRO =====")
+                    println("Nombre: $nombre")
+                    println("Correo: $correo")
+                    println("Teléfono: $telefono")
+                    println("Contraseña: $password")
+                    println("Especialidad: $especialidadSeleccionada")
+
+                    // Mostrar modal
+                    mostrarDialogo = true
+
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -155,5 +212,19 @@ fun RegisterScreen() {
                 )
             }
         }
+    }
+
+    // MODAL DE CONFIRMACIÓN
+    if (mostrarDialogo) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogo = false },
+            title = { Text("Registro") },
+            text = { Text("Usuario registrado correctamente") },
+            confirmButton = {
+                TextButton(onClick = { mostrarDialogo = false }) {
+                    Text("Aceptar")
+                }
+            }
+        )
     }
 }

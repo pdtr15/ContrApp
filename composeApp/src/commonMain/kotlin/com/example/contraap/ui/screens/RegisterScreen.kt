@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.contraap.ui.components.CustomButton
 import com.example.contraap.ui.components.CustomDropdownMenu
 // IMPORTANTE: Verifica que estos nombres de paquete sean correctos según tus carpetas
 import com.example.contraap.ui.components.CustomOutlinedTextField
@@ -111,15 +112,16 @@ fun RegisterScreen() {
                 }
             }
 
-            Button(
+            CustomButton(
+                text = "Registrarse",
                 onClick = { viewModel.onRegister() },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107))
-            ) {
-                Text("Registrarse", color = Color.Black)
-                Spacer(Modifier.width(8.dp))
-                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.Black)
-            }
+                icon = Icons.Default.ArrowForward,
+                buttonColor = Color(0xFFFFC107),
+                textColor = Color.Black,
+                iconTint = Color.Black,
+                height = 56.dp,
+                cornerRadius = 12.dp
+            )
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text("¿Ya tienes una cuenta? ")

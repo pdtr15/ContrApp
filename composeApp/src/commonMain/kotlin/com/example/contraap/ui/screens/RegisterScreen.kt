@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.contraap.ui.components.CustomDropdownMenu
 // IMPORTANTE: Verifica que estos nombres de paquete sean correctos según tus carpetas
 import com.example.contraap.ui.components.CustomOutlinedTextField
 import com.example.contraap.viewmodel.RegisterViewModel
@@ -57,6 +58,7 @@ fun RegisterScreen() {
                 value = viewModel.nombre,
                 onValueChange = { viewModel.nombre = it },
                 label = "Nombre Completo",
+                placeholder = "Ej. Juan Pérez",
                 icon = Icons.Default.Person
             )
 
@@ -64,6 +66,7 @@ fun RegisterScreen() {
                 value = viewModel.correo,
                 onValueChange = { viewModel.correo = it },
                 label = "Correo Electrónico",
+                placeholder = "nombre@ejemplo.com",
                 icon = Icons.Default.Email
             )
 
@@ -71,6 +74,7 @@ fun RegisterScreen() {
                 value = viewModel.telefono,
                 onValueChange = { viewModel.telefono = it },
                 label = "Teléfono",
+                placeholder = "+502 0000 0000",
                 icon = Icons.Default.Phone
             )
 
@@ -79,39 +83,17 @@ fun RegisterScreen() {
                 onValueChange = { viewModel.password = it },
                 label = "Contraseña",
                 icon = Icons.Default.Visibility,
+                placeholder = "***********",
                 isPassword = true
             )
 
-            // DROPDOWN DE ESPECIALIDAD
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
-            ) {
-                OutlinedTextField(
-                    value = viewModel.especialidad,
-                    onValueChange = {},
-                    label = { Text("Especialidad") },
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    especialidades.forEach { opcion ->
-                        DropdownMenuItem(
-                            text = { Text(opcion) },
-                            onClick = {
-                                viewModel.especialidad = opcion
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
+            CustomDropdownMenu(
+                label = "Especialidad",
+                placeholder = "Selecciona tu oficio",
+                opciones = especialidades,
+                seleccionado = viewModel.especialidad,
+                onOptionSelected = { viewModel.especialidad = it }
+            )
 
             // Subida de archivo (Borde sólido por ahora para que no te de error)
             Box(

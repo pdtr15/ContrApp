@@ -10,7 +10,7 @@ fun App() {
     var showOnboarding by remember { mutableStateOf(true) }
     var showSplash by remember { mutableStateOf(false) }
     var showLogin by remember { mutableStateOf(false) }
-//prueba
+
     ContraTheme {
         when {
             showOnboarding -> {

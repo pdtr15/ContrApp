@@ -33,7 +33,7 @@ fun App() {
 
             showLogin -> {
                 LoginScreen(
-                    onLoginClick = {
+                    onLoginSuccess = {
                         // Aquí navegas a la pantalla principal
                         println("Login clicked")
                     },

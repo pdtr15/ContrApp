@@ -11,37 +11,33 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.layout.ContentScale
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 import contraap.composeapp.generated.resources.Res
 import contraap.composeapp.generated.resources.contraap
 import com.example.contraap.ui.theme.AccentYellow
 import com.example.contraap.ui.theme.BackgroundWhite
 import com.example.contraap.ui.theme.TextPrimary
+import com.example.contraap.viewmodel.SplashViewModel
 
 @Composable
 fun SplashScreen(
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    viewModel: SplashViewModel = viewModel()
 ) {
-    var progress by remember { mutableStateOf(0f) }
+    val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        val duration = 2500L
-        val steps = 50
-        val stepDelay = duration / steps
-
-        repeat(steps) {
-            delay(stepDelay)
-            progress = (it + 1) / steps.toFloat()
+    // Navegar cuando se completa
+    LaunchedEffect(uiState.isCompleted) {
+        if (uiState.isCompleted) {
+            onFinish()
         }
-
-        onFinish()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundWhite), // Fondo blanco
+            .background(BackgroundWhite),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -61,26 +57,26 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Subtítulo amarillo
+            // Subtítulo
             Text(
                 text = "Tu profesional ideal",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Light,
                     fontSize = 18.sp
                 ),
-                color = TextPrimary.copy(alpha = 0.8f) // Amarillo con transparencia
+                color = TextPrimary.copy(alpha = 0.8f)
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
             // Indicador de progreso amarillo
             LinearProgressIndicator(
-                progress = { progress },
+                progress = { uiState.progress },
                 modifier = Modifier
                     .width(240.dp)
                     .height(3.dp),
-                color = AccentYellow, // Amarillo
-                trackColor = AccentYellow.copy(alpha = 0.2f), // Amarillo claro
+                color = AccentYellow,
+                trackColor = AccentYellow.copy(alpha = 0.2f),
             )
         }
     }

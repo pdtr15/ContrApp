@@ -1,10 +1,12 @@
 package com.example.contraap.ui.onboarding
 
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import contraap.composeapp.generated.resources.Res
 import contraap.composeapp.generated.resources.onboarding_1
 import contraap.composeapp.generated.resources.onboarding_2
 import contraap.composeapp.generated.resources.onboarding_3
+import com.example.contraap.viewmodel.OnboardingViewModel
 
 data class OnboardingData(
     val title: String,
@@ -14,8 +16,11 @@ data class OnboardingData(
 )
 
 @Composable
-fun OnboardingScreen(onFinish: () -> Unit) {
-    var page by remember { mutableStateOf(0) }
+fun OnboardingScreen(
+    onFinish: () -> Unit,
+    viewModel: OnboardingViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     val pages = listOf(
         OnboardingData(
@@ -38,16 +43,22 @@ fun OnboardingScreen(onFinish: () -> Unit) {
         )
     )
 
-    val current = pages[page]
+    // Navegar cuando el onboarding se completa
+    LaunchedEffect(uiState.isOnboardingCompleted) {
+        if (uiState.isOnboardingCompleted) {
+            onFinish()
+        }
+    }
+
+    val current = pages[uiState.currentPage]
 
     OnboardingPage(
         title = current.title,
         description = current.description,
         buttonText = current.buttonText,
-        pageIndex = page,
-        totalPages = pages.size,
-        imageResource = current.image
-    ) {
-        if (page < pages.lastIndex) page++ else onFinish()
-    }
+        pageIndex = uiState.currentPage,
+        totalPages = uiState.totalPages,
+        imageResource = current.image,
+        onNext = { viewModel.onNextPage() }
+    )
 }

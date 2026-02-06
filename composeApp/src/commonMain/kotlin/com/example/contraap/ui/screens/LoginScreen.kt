@@ -21,23 +21,30 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 import contraap.composeapp.generated.resources.Res
 import contraap.composeapp.generated.resources.login
 import com.example.contraap.ui.theme.*
 import com.example.contraap.ui.components.PrimaryButton
+import com.example.contraap.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit = {},
+    onLoginSuccess: () -> Unit = {},
     onRegisterClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
-    onGoogleClick: () -> Unit = {},
-    onFacebookClick: () -> Unit = {}
+    viewModel: LoginViewModel = viewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Navegar cuando el login es exitoso
+    LaunchedEffect(uiState.isLoginSuccessful) {
+        if (uiState.isLoginSuccessful) {
+            onLoginSuccess()
+            viewModel.resetLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -52,8 +59,7 @@ fun LoginScreen(
         Image(
             painter = painterResource(Res.drawable.login),
             contentDescription = "ContrApp Logo",
-            modifier = Modifier
-                .size(170.dp),
+            modifier = Modifier.size(170.dp),
             contentScale = ContentScale.Fit
         )
 
@@ -109,8 +115,8 @@ fun LoginScreen(
         Spacer(Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = uiState.email,
+            onValueChange = { viewModel.onEmailChange(it) },
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text("correo@ejemplo.com", color = TextSecondary.copy(alpha = 0.5f))
@@ -123,7 +129,8 @@ fun LoginScreen(
                 unfocusedBorderColor = DividerGray,
                 focusedContainerColor = BackgroundWhite,
                 unfocusedContainerColor = BackgroundWhite
-            )
+            ),
+            isError = uiState.errorMessage != null && uiState.email.isBlank()
         )
 
         Spacer(Modifier.height(20.dp))
@@ -142,14 +149,17 @@ fun LoginScreen(
         Spacer(Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = uiState.password,
+            onValueChange = { viewModel.onPasswordChange(it) },
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text("• • • • • • • •", color = TextSecondary.copy(alpha = 0.5f))
             },
             singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (uiState.isPasswordVisible)
+                VisualTransformation.None
+            else
+                PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -159,15 +169,33 @@ fun LoginScreen(
                 unfocusedContainerColor = BackgroundWhite
             ),
             trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        imageVector = if (uiState.isPasswordVisible)
+                            Icons.Filled.Visibility
+                        else
+                            Icons.Filled.VisibilityOff,
+                        contentDescription = if (uiState.isPasswordVisible)
+                            "Ocultar contraseña"
+                        else
+                            "Mostrar contraseña",
                         tint = TextSecondary
                     )
                 }
-            }
+            },
+            isError = uiState.errorMessage != null && uiState.password.isBlank()
         )
+
+        // Mostrar error si existe
+        if (uiState.errorMessage != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = uiState.errorMessage!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(Modifier.height(12.dp))
 
@@ -187,8 +215,8 @@ fun LoginScreen(
 
         // Botón Ingresar
         PrimaryButton(
-            text = "Ingresar",
-            onClick = onLoginClick
+            text = if (uiState.isLoading) "Cargando..." else "Ingresar",
+            onClick = { viewModel.onLoginClick() }
         )
 
         Spacer(Modifier.height(24.dp))
@@ -228,7 +256,7 @@ fun LoginScreen(
         ) {
             // Botón Google
             OutlinedButton(
-                onClick = onGoogleClick,
+                onClick = { viewModel.onGoogleLogin() },
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp),
@@ -246,7 +274,6 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Icono de Google (puedes usar un ícono real o texto)
                     Text(
                         text = "G",
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -260,7 +287,7 @@ fun LoginScreen(
 
             // Botón Facebook
             OutlinedButton(
-                onClick = onFacebookClick,
+                onClick = { viewModel.onFacebookLogin() },
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp),
@@ -278,7 +305,6 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Icono de Facebook (puedes usar un ícono real o texto)
                     Text(
                         text = "f",
                         style = MaterialTheme.typography.titleMedium.copy(

@@ -20,6 +20,7 @@ import com.example.contraap.ui.components.CustomButton
 import com.example.contraap.ui.components.CustomDropdownMenu
 // IMPORTANTE: Verifica que estos nombres de paquete sean correctos según tus carpetas
 import com.example.contraap.ui.components.CustomOutlinedTextField
+import com.example.contraap.ui.components.CustomTopAppBar
 import com.example.contraap.viewmodel.RegisterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,13 +33,9 @@ fun RegisterScreen() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Crear Cuenta") },
-                navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
-                    }
-                }
+            CustomTopAppBar(
+                title = "Crear Cuenta",
+                onBackClick = { /* Lógica de navegación */ }
             )
         }
     ) { padding ->
@@ -47,14 +44,12 @@ fun RegisterScreen() {
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
-                // Agregamos scroll por si el teclado tapa los campos
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(text = "Registro de Profesional", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Text(text = "Únete a nuestra red de expertos.", color = Color(0xFF1976D2))
 
-            // USANDO TU COMPONENTE CustomOutlinedTextField
             CustomOutlinedTextField(
                 value = viewModel.nombre,
                 onValueChange = { viewModel.nombre = it },
@@ -96,7 +91,6 @@ fun RegisterScreen() {
                 onOptionSelected = { viewModel.especialidad = it }
             )
 
-            // Subida de archivo (Borde sólido por ahora para que no te de error)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

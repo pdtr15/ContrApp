@@ -16,8 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.contraap.ui.components.CustomButton
+import com.example.contraap.ui.components.CustomDropdownMenu
 // IMPORTANTE: Verifica que estos nombres de paquete sean correctos según tus carpetas
 import com.example.contraap.ui.components.CustomOutlinedTextField
+import com.example.contraap.ui.components.CustomTopAppBar
 import com.example.contraap.viewmodel.RegisterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,13 +33,9 @@ fun RegisterScreen() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Crear Cuenta") },
-                navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
-                    }
-                }
+            CustomTopAppBar(
+                title = "Crear Cuenta",
+                onBackClick = { /* Lógica de navegación */ }
             )
         }
     ) { padding ->
@@ -45,18 +44,17 @@ fun RegisterScreen() {
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
-                // Agregamos scroll por si el teclado tapa los campos
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(text = "Registro de Profesional", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Text(text = "Únete a nuestra red de expertos.", color = Color(0xFF1976D2))
 
-            // USANDO TU COMPONENTE CustomOutlinedTextField
             CustomOutlinedTextField(
                 value = viewModel.nombre,
                 onValueChange = { viewModel.nombre = it },
                 label = "Nombre Completo",
+                placeholder = "Ej. Juan Pérez",
                 icon = Icons.Default.Person
             )
 
@@ -64,6 +62,7 @@ fun RegisterScreen() {
                 value = viewModel.correo,
                 onValueChange = { viewModel.correo = it },
                 label = "Correo Electrónico",
+                placeholder = "nombre@ejemplo.com",
                 icon = Icons.Default.Email
             )
 
@@ -71,6 +70,7 @@ fun RegisterScreen() {
                 value = viewModel.telefono,
                 onValueChange = { viewModel.telefono = it },
                 label = "Teléfono",
+                placeholder = "+502 0000 0000",
                 icon = Icons.Default.Phone
             )
 
@@ -79,41 +79,18 @@ fun RegisterScreen() {
                 onValueChange = { viewModel.password = it },
                 label = "Contraseña",
                 icon = Icons.Default.Visibility,
+                placeholder = "***********",
                 isPassword = true
             )
 
-            // DROPDOWN DE ESPECIALIDAD
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
-            ) {
-                OutlinedTextField(
-                    value = viewModel.especialidad,
-                    onValueChange = {},
-                    label = { Text("Especialidad") },
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    shape = RoundedCornerShape(12.dp)
-                )
+            CustomDropdownMenu(
+                label = "Especialidad",
+                placeholder = "Selecciona tu oficio",
+                opciones = especialidades,
+                seleccionado = viewModel.especialidad,
+                onOptionSelected = { viewModel.especialidad = it }
+            )
 
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    especialidades.forEach { opcion ->
-                        DropdownMenuItem(
-                            text = { Text(opcion) },
-                            onClick = {
-                                viewModel.especialidad = opcion
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Subida de archivo (Borde sólido por ahora para que no te de error)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -129,15 +106,16 @@ fun RegisterScreen() {
                 }
             }
 
-            Button(
+            CustomButton(
+                text = "Registrarse",
                 onClick = { viewModel.onRegister() },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107))
-            ) {
-                Text("Registrarse", color = Color.Black)
-                Spacer(Modifier.width(8.dp))
-                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.Black)
-            }
+                icon = Icons.Default.ArrowForward,
+                buttonColor = Color(0xFFFFC107),
+                textColor = Color.Black,
+                iconTint = Color.Black,
+                height = 56.dp,
+                cornerRadius = 12.dp
+            )
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text("¿Ya tienes una cuenta? ")

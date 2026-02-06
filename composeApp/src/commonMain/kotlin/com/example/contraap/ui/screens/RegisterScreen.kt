@@ -83,6 +83,7 @@ fun RegisterScreen() {
                 isPassword = true
             )
 
+
             CustomDropdownMenu(
                 label = "Especialidad",
                 placeholder = "Selecciona tu oficio",

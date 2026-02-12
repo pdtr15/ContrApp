@@ -28,7 +28,9 @@ import com.example.contraap.viewmodel.JoinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JoinContraAppScreen() {
+fun JoinContraAppScreen(
+    onBack: () -> Unit
+) {
     val viewModel = remember { JoinViewModel() }
     val scrollState = rememberScrollState()
 
@@ -36,7 +38,7 @@ fun JoinContraAppScreen() {
         topBar = {
             CustomTopAppBar(
                 title = "CONTRAAPP",
-                onBackClick = { /* Lógica de navegación */ }
+                onBackClick = { onBack() }
             )
         }
     ) { padding ->

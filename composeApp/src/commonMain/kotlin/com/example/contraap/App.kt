@@ -1,57 +1,94 @@
 import androidx.compose.runtime.*
-import com.example.contraap.ui.screens.RegisterScreen
-import com.example.contraap.ui.screens.LoginScreen
-import com.example.contraap.ui.screens.MainScreen
-import com.example.contraap.ui.theme.ContraTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+// Asegúrate de importar tus pantallas
+import com.example.contraap.ui.screens.*
 import com.example.contraap.ui.onboarding.OnboardingScreen
 import com.example.contraap.ui.splash.SplashScreen
+import com.example.contraap.ui.theme.ContraTheme
 
 @Composable
 fun App() {
-    var showOnboarding by remember { mutableStateOf(true) }
-    var showSplash by remember { mutableStateOf(false) }
-    var showLogin by remember { mutableStateOf(false) }
-    var showMain by remember { mutableStateOf(false) }  // ← Agregado
-
     ContraTheme {
-        when {
-            showOnboarding -> {
+        // 1. EL CONTROLADOR (El taxista)
+        val navController = rememberNavController()
+
+        // 2. EL MAPA (NavHost)
+        // startDestination = "onboarding" significa que es la primera pantalla que se ve
+        NavHost(navController = navController, startDestination = "onboarding") {
+
+            // --- PANTALLA 1: ONBOARDING ---
+            composable("onboarding") {
                 OnboardingScreen(
                     onFinish = {
-                        showOnboarding = false
-                        showSplash = true
+                        // Navegamos al Splash y borramos el Onboarding del historial
+                        // para que no se pueda volver atrás.
+                        navController.navigate("splash") {
+                            popUpTo("onboarding") { inclusive = true }
+                        }
                     }
                 )
             }
 
-            showSplash -> {
+            // --- PANTALLA 2: SPLASH ---
+            composable("splash") {
                 SplashScreen(
                     onFinish = {
-                        showSplash = false
-                        showLogin = true
+                        // Del Splash saltamos al Login, borrando el Splash del historial
+                        navController.navigate("login") {
+                            popUpTo("splash") { inclusive = true }
+                        }
                     }
                 )
             }
 
-            showLogin -> {
+            // --- PANTALLA 3: LOGIN ---
+            composable("login") {
                 LoginScreen(
                     onLoginSuccess = {
-                        showLogin = false
-                        showMain = true  // ← Cambiado
+                        // Al entrar con éxito, vamos al Home (Main)
+                        // Borramos TODO el historial anterior para que al dar "Atrás" se salga de la app
+                        navController.navigate("main") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     },
-                    onRegisterClick = {
-                        showLogin = false
-                        // TODO: Mostrar RegisterScreen
+                    onRegisterProfesionalClick = {
+                        // Simplemente vamos a la pantalla de registro
+                        navController.navigate("registerProfesional")
+                    },
+                    onRegisterClienteClick = {
+                        // Simplemente vamos a la pantalla de registro
+                        navController.navigate("registerCliente")
                     }
                 )
             }
 
-            showMain -> {  // ← Agregado este caso
+            // --- PANTALLA 4: REGISTRO ---
+            composable("registerProfesional") {
+                // Aquí usamos tu pantalla tal cual la dejaste, con el evento onBack
+                RegisterScreen(
+                    onBack = {
+                        // Esta es la magia: "Regresa a la pantalla anterior" (Login)
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            // --- PANTALLA 5: MAIN (HOME) ---
+            composable("main") {
                 MainScreen()
             }
 
-            else -> {
-                RegisterScreen()
+            // --- PANTALLA 6: REGISTRO ---
+            composable("registerCliente") {
+                // Aquí usamos tu pantalla tal cual la dejaste, con el evento onBack
+                JoinContraAppScreen(
+                    onBack = {
+                        // Esta es la magia: "Regresa a la pantalla anterior" (Login)
+                        navController.popBackStack()
+                    }
+                )
             }
         }
     }

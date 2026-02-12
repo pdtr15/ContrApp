@@ -25,17 +25,31 @@ import com.example.contraap.viewmodel.RegisterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(
+    onBack: () -> Unit
+) {
     // Creamos una instancia del ViewModel persistente en este Composable
     val viewModel = remember { RegisterViewModel() }
-    val especialidades = listOf("Electricista", "Plomero", "Carpintero", "Albañil", "Pintor", "Jardinero")
+    val especialidades = listOf(
+        "Servicio de limpieza",
+        "Jardinería",
+        "Electricista",
+        "Plomería",
+        "Mecánico Moto/Carros",
+        "Tutorías (Matemáticas/ESL)",
+        "Pintor",
+        "Línea blanca",
+        "Fumigadores",
+        "Albañilería"
+    )
+
     var expanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             CustomTopAppBar(
                 title = "Crear Cuenta",
-                onBackClick = { /* Lógica de navegación */ }
+                onBackClick = { onBack() }
             )
         }
     ) { padding ->
@@ -86,10 +100,16 @@ fun RegisterScreen() {
 
             CustomDropdownMenu(
                 label = "Especialidad",
-                placeholder = "Selecciona tu oficio",
+                placeholder = "Selecciona tus oficios", // Plural
                 opciones = especialidades,
-                seleccionado = viewModel.especialidad,
-                onOptionSelected = { viewModel.especialidad = it }
+
+                // Pasamos la lista del ViewModel
+                selectedItems = viewModel.especialidadesSeleccionadas,
+
+                // Actualizamos el ViewModel con la nueva lista
+                onSelectionChange = { nuevaLista ->
+                    viewModel.especialidadesSeleccionadas = nuevaLista
+                }
             )
 
             Box(

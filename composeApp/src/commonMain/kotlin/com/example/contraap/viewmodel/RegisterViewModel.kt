@@ -9,7 +9,7 @@ class RegisterViewModel {
     var correo by mutableStateOf("")
     var telefono by mutableStateOf("")
     var password by mutableStateOf("")
-    var especialidad by mutableStateOf("")
+    var especialidadesSeleccionadas by mutableStateOf(listOf<String>())
     var mostrarDialogo by mutableStateOf(false)
 
     fun onRegister() {

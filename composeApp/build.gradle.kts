@@ -40,6 +40,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(compose.materialIconsExtended)
+            implementation(libs.navigation.compose)
 
             // ViewModel
             implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")

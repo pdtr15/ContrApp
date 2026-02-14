@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,130 +19,210 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.contraap.ui.theme.*
 
-data class Category(val name: String, val icon: String)
-data class Contractor(val name: String, val profession: String, val rating: Double, val jobs: Int)
+data class Category(val id: Int, val name: String, val icon: String)
+data class Contractor(
+    val id: Int,
+    val name: String,
+    val profession: String,
+    val rating: Double,
+    val jobs: Int,
+    val verified: Boolean = true
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onRequestServiceClick: () -> Unit = {}
+) {
+    // Categorías actualizadas con las correctas
     val categories = remember {
         listOf(
-            Category("Plomería", "🔧"),
-            Category("Electricidad", "⚡"),
-            Category("Pintura", "🎨"),
-            Category("Carpintería", "🪚"),
-            Category("Limpieza", "🧹")
+            Category(1, "Servicio de limpieza", "🧹"),
+            Category(2, "Jardinería", "🌿"),
+            Category(3, "Electricista", "⚡"),
+            Category(4, "Plomería", "🔧"),
+            Category(5, "Mecánico Moto/Carros", "🔩"),
+            Category(6, "Tutorías", "📚"),
+            Category(7, "Pintor", "🎨"),
+            Category(8, "Línea blanca", "🔌"),
+            Category(9, "Fumigadores", "🐛"),
+            Category(10, "Albañilería", "🧱")
         )
     }
 
+    // TODO: Estos datos deben venir de tu Base de Datos
+    // Por ahora son datos de ejemplo
     val topContractors = remember {
         listOf(
-            Contractor("Juan Pérez", "Plomero", 4.8, 127),
-            Contractor("María García", "Electricista", 4.9, 203),
-            Contractor("Carlos López", "Pintor", 4.7, 156)
+            Contractor(1, "Juan Pérez", "Plomería", 4.8, 127, true),
+            Contractor(2, "María García", "Electricista", 4.9, 203, true),
+            Contractor(3, "Carlos López", "Pintor", 4.7, 156, true),
+            Contractor(4, "Ana Martínez", "Servicio de limpieza", 4.9, 189, true),
+            Contractor(5, "Pedro González", "Jardinería", 4.6, 95, true)
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundWhite)
-    ) {
-        // Header con buscador
-        Surface(
-            shadowElevation = 4.dp,
-            color = BackgroundWhite
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onRequestServiceClick,
+                containerColor = AccentYellow,
+                contentColor = TextPrimary,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Text(
-                    text = "Encuentra tu profesional",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 28.sp
-                    ),
-                    color = TextPrimary
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                // Barra de búsqueda
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Buscar servicios...") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar",
-                            tint = TextSecondary
-                        )
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryBlue,
-                        unfocusedBorderColor = DividerGray,
-                        focusedContainerColor = BackgroundWhite,
-                        unfocusedContainerColor = BackgroundWhite
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Nueva solicitud"
                     )
-                )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Nueva Solicitud",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
             }
         }
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 16.dp)
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundWhite)
+                .padding(paddingValues)
         ) {
-            // Categorías
-            item {
-                Column {
+            // Header con buscador
+            Surface(
+                shadowElevation = 4.dp,
+                color = BackgroundWhite
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
                     Text(
-                        text = "Categorías",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        text = "Encuentra tu profesional",
+                        style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
+                            fontSize = 28.sp
                         ),
-                        color = TextPrimary,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        color = TextPrimary
                     )
 
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(16.dp))
 
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) {
-                        items(categories) { category ->
-                            CategoryCard(category)
-                        }
-                    }
+                    // Barra de búsqueda
+                    OutlinedTextField(
+                        value = "",
+                        onValueChange = {},
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Buscar servicios...") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Buscar",
+                                tint = TextSecondary
+                            )
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = DividerGray,
+                            focusedContainerColor = BackgroundWhite,
+                            unfocusedContainerColor = BackgroundWhite
+                        )
+                    )
                 }
             }
 
-            item { Spacer(Modifier.height(24.dp)) }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 16.dp)
+            ) {
+                // Categorías
+                item {
+                    Column {
+                        Text(
+                            text = "Categorías",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
+                            ),
+                            color = TextPrimary,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
 
-            // Top Profesionales
-            item {
-                Text(
-                    text = "Profesionales destacados",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    ),
-                    color = TextPrimary,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                        Spacer(Modifier.height(12.dp))
 
-                Spacer(Modifier.height(12.dp))
-            }
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) {
+                            items(categories) { category ->
+                                CategoryCard(category)
+                            }
+                        }
+                    }
+                }
 
-            items(topContractors) { contractor ->
-                ContractorCard(contractor)
-                Spacer(Modifier.height(12.dp))
+                item { Spacer(Modifier.height(24.dp)) }
+
+                // Top Profesionales
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Profesionales destacados",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
+                            ),
+                            color = TextPrimary
+                        )
+
+                        TextButton(onClick = { /* TODO: Ver todos */ }) {
+                            Text(
+                                "Ver todos",
+                                color = PrimaryBlue,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+                }
+
+                items(topContractors) { contractor ->
+                    ContractorCard(contractor)
+                    Spacer(Modifier.height(12.dp))
+                }
+
+                // Mensaje si no hay contratistas
+                if (topContractors.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No hay profesionales disponibles",
+                                color = TextSecondary,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -176,7 +257,9 @@ fun CategoryCard(category: Category) {
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp
                 ),
-                color = TextPrimary
+                color = TextPrimary,
+                maxLines = 2,
+                lineHeight = 16.sp
             )
         }
     }
@@ -224,14 +307,34 @@ fun ContractorCard(contractor: Contractor) {
             Spacer(Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = contractor.name,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    ),
-                    color = TextPrimary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = contractor.name,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        color = TextPrimary
+                    )
+
+                    // Badge de verificado
+                    if (contractor.verified) {
+                        Spacer(Modifier.width(4.dp))
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = PrimaryBlue.copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = "✓",
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                color = PrimaryBlue,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
                 Text(
                     text = contractor.profession,
                     style = MaterialTheme.typography.bodyMedium,
@@ -259,7 +362,7 @@ fun ContractorCard(contractor: Contractor) {
             }
 
             Button(
-                onClick = { },
+                onClick = { /* TODO: Contratar */ },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = AccentYellow,
                     contentColor = TextPrimary

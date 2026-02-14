@@ -1,5 +1,6 @@
 package com.example.contraap.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -10,6 +11,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -29,77 +33,91 @@ fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    var showRequestService by remember { mutableStateOf(false) }  // ← Agregado estado
 
     val items = listOf(
         BottomNavItem.Home,
-        BottomNavItem.Requests,  // ← Cambiado de Bookings
+        BottomNavItem.Requests,
         BottomNavItem.Messages,
         BottomNavItem.Profile
     )
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar(
-                containerColor = BackgroundWhite,
-                contentColor = PrimaryBlue,
-                tonalElevation = 8.dp
-            ) {
-                items.forEach { item ->
-                    val selected = currentDestination?.hierarchy?.any {
-                        it.route == item.route
-                    } == true
+    // ← Agregado: Mostrar RequestServiceScreen cuando sea necesario
+    if (showRequestService) {
+        RequestServiceScreen(
+            onBackClick = { showRequestService = false },
+            onSubmit = {
+                showRequestService = false
+                // TODO: Aquí puedes agregar lógica para guardar la solicitud
+            }
+        )
+    } else {
+        Scaffold(
+            bottomBar = {
+                NavigationBar(
+                    containerColor = BackgroundWhite,
+                    contentColor = PrimaryBlue,
+                    tonalElevation = 8.dp
+                ) {
+                    items.forEach { item ->
+                        val selected = currentDestination?.hierarchy?.any {
+                            it.route == item.route
+                        } == true
 
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = item.title
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = item.title,
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        },
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                    contentDescription = item.title
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = item.title,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            },
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = AccentYellow,
-                            selectedTextColor = AccentYellow,
-                            unselectedIconColor = TextSecondary,
-                            unselectedTextColor = TextSecondary,
-                            indicatorColor = AccentYellow.copy(alpha = 0.2f)
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = AccentYellow,
+                                selectedTextColor = AccentYellow,
+                                unselectedIconColor = TextSecondary,
+                                unselectedTextColor = TextSecondary,
+                                indicatorColor = AccentYellow.copy(alpha = 0.2f)
+                            )
                         )
-                    )
+                    }
                 }
             }
-        }
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = BottomNavItem.Home.route,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable(BottomNavItem.Home.route) {
-                HomeScreen()
-            }
-            composable(BottomNavItem.Requests.route) {  // ← Cambiado
-                RequestsScreen()  // ← Cambiado
-            }
-            composable(BottomNavItem.Messages.route) {
-                MessagesScreen()
-            }
-            composable(BottomNavItem.Profile.route) {
-                ProfileScreen()
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = BottomNavItem.Home.route,
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                composable(BottomNavItem.Home.route) {
+                    HomeScreen(
+                        onRequestServiceClick = { showRequestService = true }  // ← Agregado callback
+                    )
+                }
+                composable(BottomNavItem.Requests.route) {
+                    RequestsScreen()
+                }
+                composable(BottomNavItem.Messages.route) {
+                    MessagesScreen()
+                }
+                composable(BottomNavItem.Profile.route) {
+                    ProfileScreen()
+                }
             }
         }
     }

@@ -47,6 +47,7 @@ kotlin {
 
             // Navegación - VERSIÓN CORRECTA PARA KMP
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

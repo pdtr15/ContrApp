@@ -24,7 +24,7 @@ sealed class BottomNavItem(
         unselectedIcon = Icons.Outlined.Home
     )
 
-    data object Requests : BottomNavItem(  // ← ASEGÚRATE QUE DIGA "Requests"
+    data object Requests : BottomNavItem(
         route = "requests",
         title = "Solicitudes",
         selectedIcon = Icons.Filled.Assignment,

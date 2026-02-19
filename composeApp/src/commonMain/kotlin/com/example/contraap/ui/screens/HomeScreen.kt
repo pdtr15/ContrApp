@@ -2,6 +2,7 @@ package com.example.contraap.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,31 +37,24 @@ data class Contractor(
 fun HomeScreen(
     onRequestServiceClick: () -> Unit = {}
 ) {
-    // Categorías actualizadas con las correctas
+    var currentLocation by remember { mutableStateOf("Guatemala City, Guatemala") }
+    var showLocationDialog by remember { mutableStateOf(false) }
+
     val categories = remember {
         listOf(
             Category(1, "Servicio de limpieza", "🧹"),
             Category(2, "Jardinería", "🌿"),
             Category(3, "Electricista", "⚡"),
             Category(4, "Plomería", "🔧"),
-            Category(5, "Mecánico Moto/Carros", "🔩"),
-            Category(6, "Tutorías", "📚"),
-            Category(7, "Pintor", "🎨"),
-            Category(8, "Línea blanca", "🔌"),
-            Category(9, "Fumigadores", "🐛"),
-            Category(10, "Albañilería", "🧱")
+            Category(5, "Pintor", "🎨"),
+            Category(6, "Albañilería", "🧱")
         )
     }
 
-    // TODO: Estos datos deben venir de tu Base de Datos
-    // Por ahora son datos de ejemplo
     val topContractors = remember {
         listOf(
             Contractor(1, "Juan Pérez", "Plomería", 4.8, 127, true),
-            Contractor(2, "María García", "Electricista", 4.9, 203, true),
-            Contractor(3, "Carlos López", "Pintor", 4.7, 156, true),
-            Contractor(4, "Ana Martínez", "Servicio de limpieza", 4.9, 189, true),
-            Contractor(5, "Pedro González", "Jardinería", 4.6, 95, true)
+            Contractor(2, "María García", "Electricista", 4.9, 203, true)
         )
     }
 
@@ -94,7 +90,6 @@ fun HomeScreen(
                 .background(BackgroundWhite)
                 .padding(paddingValues)
         ) {
-            // Header con buscador
             Surface(
                 shadowElevation = 4.dp,
                 color = BackgroundWhite
@@ -104,6 +99,51 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showLocationDialog = true }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Ubicación",
+                            tint = PrimaryBlue,
+                            modifier = Modifier.size(24.dp)
+                        )
+
+                        Spacer(Modifier.width(8.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Ubicación del servicio",
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = currentLocation,
+                                fontSize = 15.sp,
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Cambiar ubicación",
+                            tint = TextSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Divider(
+                        color = DividerGray,
+                        thickness = 1.dp,
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+
                     Text(
                         text = "Encuentra tu profesional",
                         style = MaterialTheme.typography.headlineMedium.copy(
@@ -115,7 +155,6 @@ fun HomeScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // Barra de búsqueda
                     OutlinedTextField(
                         value = "",
                         onValueChange = {},
@@ -143,7 +182,6 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-                // Categorías
                 item {
                     Column {
                         Text(
@@ -171,7 +209,6 @@ fun HomeScreen(
 
                 item { Spacer(Modifier.height(24.dp)) }
 
-                // Top Profesionales
                 item {
                     Row(
                         modifier = Modifier
@@ -206,7 +243,6 @@ fun HomeScreen(
                     Spacer(Modifier.height(12.dp))
                 }
 
-                // Mensaje si no hay contratistas
                 if (topContractors.isEmpty()) {
                     item {
                         Box(
@@ -216,7 +252,7 @@ fun HomeScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No hay profesionales disponibles",
+                                text = "No hay profesionales disponibles en tu área",
                                 color = TextSecondary,
                                 fontSize = 14.sp
                             )
@@ -226,6 +262,160 @@ fun HomeScreen(
             }
         }
     }
+
+    if (showLocationDialog) {
+        LocationSelectionDialog(
+            currentLocation = currentLocation,
+            onLocationSelected = { newLocation: String ->
+                currentLocation = newLocation
+                showLocationDialog = false
+            },
+            onDismiss = { showLocationDialog = false }
+        )
+    }
+}
+
+@Composable
+fun LocationSelectionDialog(
+    currentLocation: String,
+    onLocationSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var manualLocation by remember { mutableStateOf("") }
+
+    val savedLocations = remember {
+        listOf(
+            "Guatemala City, Guatemala",
+            "Antigua Guatemala, Sacatepéquez",
+            "Quetzaltenango, Guatemala",
+            "Escuintla, Guatemala"
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Ubicación del servicio",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onLocationSelected("Ubicación GPS (pendiente)")
+                        },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = PrimaryBlue.copy(alpha = 0.1f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = PrimaryBlue,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                "Usar ubicación actual",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                color = TextPrimary
+                            )
+                            Text(
+                                "Detectar automáticamente",
+                                fontSize = 13.sp,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Text(
+                    "Ubicaciones guardadas",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextSecondary
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                savedLocations.forEach { location ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable { onLocationSelected(location) },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (location == currentLocation)
+                                AccentYellow.copy(alpha = 0.15f)
+                            else
+                                BackgroundWhite
+                        ),
+                        border = if (location == currentLocation)
+                            androidx.compose.foundation.BorderStroke(2.dp, AccentYellow)
+                        else null
+                    ) {
+                        Text(
+                            text = location,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            fontSize = 14.sp,
+                            color = TextPrimary
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = manualLocation,
+                    onValueChange = { manualLocation = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Escribe tu dirección", fontSize = 14.sp) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryBlue,
+                        unfocusedBorderColor = DividerGray
+                    ),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            if (manualLocation.isNotBlank()) {
+                TextButton(
+                    onClick = { onLocationSelected(manualLocation) }
+                ) {
+                    Text("Usar esta dirección", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", color = TextSecondary)
+            }
+        },
+        containerColor = BackgroundWhite
+    )
 }
 
 @Composable
@@ -285,7 +475,6 @@ fun ContractorCard(contractor: Contractor) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
             Surface(
                 modifier = Modifier.size(60.dp),
                 shape = RoundedCornerShape(12.dp),
@@ -317,7 +506,6 @@ fun ContractorCard(contractor: Contractor) {
                         color = TextPrimary
                     )
 
-                    // Badge de verificado
                     if (contractor.verified) {
                         Spacer(Modifier.width(4.dp))
                         Surface(

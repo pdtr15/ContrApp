@@ -50,12 +50,8 @@ fun RequestServiceScreen(
             ServiceCategory(2, "Jardinería"),
             ServiceCategory(3, "Electricista"),
             ServiceCategory(4, "Plomería"),
-            ServiceCategory(5, "Mecánico Moto/Carros"),
-            ServiceCategory(6, "Tutorías (Matemáticas/ESL)"),
-            ServiceCategory(7, "Pintor"),
-            ServiceCategory(8, "Línea blanca"),
-            ServiceCategory(9, "Fumigadores"),
-            ServiceCategory(10, "Albañilería")
+            ServiceCategory(5, "Pintor"),
+            ServiceCategory(6, "Albañilería")
         )
     }
 

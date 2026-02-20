@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
@@ -150,54 +149,6 @@ fun HomeScreen(
                             modifier = Modifier.size(Dimensions.iconSizeMedium())
                         )
                     }
-
-                    Divider(
-                        color = DividerGray,
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(vertical = Dimensions.paddingSmall())
-                    )
-
-                    Text(
-                        text = "Encuentra tu profesional",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = Dimensions.fontSizeTitle()
-                        ),
-                        color = TextPrimary
-                    )
-
-                    Spacer(Modifier.height(Dimensions.paddingMedium()))
-
-                    // Barra de búsqueda
-                    OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = {
-                            Text(
-                                "Buscar servicios...",
-                                fontSize = Dimensions.fontSizeMedium()
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Buscar",
-                                tint = TextSecondary,
-                                modifier = Modifier.size(Dimensions.iconSizeMedium())
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PrimaryBlue,
-                            unfocusedBorderColor = DividerGray,
-                            focusedContainerColor = BackgroundWhite,
-                            unfocusedContainerColor = BackgroundWhite
-                        ),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = Dimensions.fontSizeMedium()
-                        )
-                    )
                 }
             }
 

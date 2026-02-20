@@ -4,6 +4,7 @@
     <!-- Permisos de ubicación -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
             android:allowBackup="true"
@@ -13,8 +14,11 @@
             android:supportsRtl="true"
             android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
+                android:name=".MainActivity"
                 android:exported="true"
-                android:name=".MainActivity">
+                android:configChanges="orientation|screenSize|keyboardHidden"
+                android:windowSoftInputMode="adjustResize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

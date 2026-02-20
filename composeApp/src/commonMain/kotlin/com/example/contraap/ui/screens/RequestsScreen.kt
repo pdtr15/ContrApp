@@ -90,50 +90,15 @@ fun RequestsScreen() {
                         isCurrent = true
                     ),
                     TimelineEvent(
-                        "Entrega estimada",
+                        "Llegada estimada",
                         "hoy miércoles 18 de febrero",
                         "2:00 PM",
                         isCompleted = false
                     )
                 )
-            ),
-            Request(
-                id = "#26-372416",
-                title = "Instalación eléctrica",
-                contractor = "María García",
-                contractorPhone = "+502 1234 5678",
-                date = "15 de febrero",
-                status = RequestStatus.COMPLETED,
-                price = "Q300.00",
-                category = "Electricista",
-                location = "Zona 10, Ciudad de Guatemala",
-                timeline = listOf(
-                    TimelineEvent("Solicitud enviada", "15 de febrero", "10:00 AM", true),
-                    TimelineEvent("Aceptado", "15 de febrero", "11:30 AM", true),
-                    TimelineEvent("Completado", "15 de febrero", "4:00 PM", true, true)
-                )
-            ),
-            Request(
-                id = "#26-372415",
-                title = "Pintura de casa",
-                contractor = null,
-                contractorPhone = null,
-                date = "14 de febrero",
-                status = RequestStatus.PENDING,
-                price = "Q500.00",
-                category = "Pintor",
-                location = "Antigua Guatemala",
-                timeline = listOf(
-                    TimelineEvent(
-                        "Solicitud enviada",
-                        "Esperando respuesta de profesionales",
-                        "14 de febrero, 3:00 PM",
-                        isCompleted = true,
-                        isCurrent = true
-                    )
-                )
             )
-        )
+            )
+
     }
 
     var selectedTab by remember { mutableStateOf(0) }

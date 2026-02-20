@@ -64,22 +64,32 @@ fun HomeScreen(
                 onClick = onRequestServiceClick,
                 containerColor = AccentYellow,
                 contentColor = TextPrimary,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(Dimensions.paddingMedium())
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                if (Dimensions.isCompact()) {
+                    // Solo ícono en pantallas pequeñas
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Nueva solicitud"
+                        contentDescription = "Nueva solicitud",
+                        modifier = Modifier.size(Dimensions.iconSizeMedium())
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "Nueva Solicitud",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                } else {
+                    // Ícono + texto en pantallas grandes
+                    Row(
+                        modifier = Modifier.padding(horizontal = Dimensions.paddingMedium()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Nueva solicitud"
+                        )
+                        Spacer(Modifier.width(Dimensions.paddingSmall()))
+                        Text(
+                            "Nueva Solicitud",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = Dimensions.fontSizeMedium()
+                        )
+                    }
                 }
             }
         }
@@ -90,6 +100,7 @@ fun HomeScreen(
                 .background(BackgroundWhite)
                 .padding(paddingValues)
         ) {
+            // Header con ubicación y buscador
             Surface(
                 shadowElevation = 4.dp,
                 color = BackgroundWhite
@@ -97,36 +108,38 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(Dimensions.paddingMedium())
                 ) {
+                    // Selector de ubicación
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { showLocationDialog = true }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = Dimensions.paddingSmall()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Ubicación",
                             tint = PrimaryBlue,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(Dimensions.iconSizeMedium())
                         )
 
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(Dimensions.paddingSmall()))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Ubicación del servicio",
-                                fontSize = 12.sp,
+                                fontSize = Dimensions.fontSizeSmall(),
                                 color = TextSecondary,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
                                 text = currentLocation,
-                                fontSize = 15.sp,
+                                fontSize = Dimensions.fontSizeMedium(),
                                 color = TextPrimary,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
                             )
                         }
 
@@ -134,37 +147,44 @@ fun HomeScreen(
                             imageVector = Icons.Default.KeyboardArrowDown,
                             contentDescription = "Cambiar ubicación",
                             tint = TextSecondary,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(Dimensions.iconSizeMedium())
                         )
                     }
 
                     Divider(
                         color = DividerGray,
                         thickness = 1.dp,
-                        modifier = Modifier.padding(vertical = 12.dp)
+                        modifier = Modifier.padding(vertical = Dimensions.paddingSmall())
                     )
 
                     Text(
                         text = "Encuentra tu profesional",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 28.sp
+                            fontSize = Dimensions.fontSizeTitle()
                         ),
                         color = TextPrimary
                     )
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(Dimensions.paddingMedium()))
 
+                    // Barra de búsqueda
                     OutlinedTextField(
                         value = "",
                         onValueChange = {},
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Buscar servicios...") },
+                        placeholder = {
+                            Text(
+                                "Buscar servicios...",
+                                fontSize = Dimensions.fontSizeMedium()
+                            )
+                        },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Buscar",
-                                tint = TextSecondary
+                                tint = TextSecondary,
+                                modifier = Modifier.size(Dimensions.iconSizeMedium())
                             )
                         },
                         shape = RoundedCornerShape(12.dp),
@@ -173,6 +193,9 @@ fun HomeScreen(
                             unfocusedBorderColor = DividerGray,
                             focusedContainerColor = BackgroundWhite,
                             unfocusedContainerColor = BackgroundWhite
+                        ),
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = Dimensions.fontSizeMedium()
                         )
                     )
                 }
@@ -180,25 +203,26 @@ fun HomeScreen(
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 16.dp)
+                contentPadding = PaddingValues(vertical = Dimensions.paddingMedium())
             ) {
+                // Categorías
                 item {
                     Column {
                         Text(
                             text = "Categorías",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
+                                fontSize = Dimensions.fontSizeLarge()
                             ),
                             color = TextPrimary,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = Dimensions.paddingMedium())
                         )
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(Dimensions.paddingSmall()))
 
                         LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp)
+                            horizontalArrangement = Arrangement.spacedBy(Dimensions.paddingSmall()),
+                            contentPadding = PaddingValues(horizontal = Dimensions.paddingMedium())
                         ) {
                             items(categories) { category ->
                                 CategoryCard(category)
@@ -207,13 +231,14 @@ fun HomeScreen(
                     }
                 }
 
-                item { Spacer(Modifier.height(24.dp)) }
+                item { Spacer(Modifier.height(Dimensions.paddingMedium())) }
 
+                // Top Profesionales
                 item {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = Dimensions.paddingMedium()),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -221,7 +246,7 @@ fun HomeScreen(
                             text = "Profesionales destacados",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
+                                fontSize = Dimensions.fontSizeLarge()
                             ),
                             color = TextPrimary
                         )
@@ -230,17 +255,17 @@ fun HomeScreen(
                             Text(
                                 "Ver todos",
                                 color = PrimaryBlue,
-                                fontSize = 14.sp
+                                fontSize = Dimensions.fontSizeSmall()
                             )
                         }
                     }
 
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(Dimensions.paddingSmall()))
                 }
 
                 items(topContractors) { contractor ->
                     ContractorCard(contractor)
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(Dimensions.paddingSmall()))
                 }
 
                 if (topContractors.isEmpty()) {
@@ -248,13 +273,13 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(32.dp),
+                                .padding(Dimensions.paddingLarge()),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "No hay profesionales disponibles en tu área",
                                 color = TextSecondary,
-                                fontSize = 14.sp
+                                fontSize = Dimensions.fontSizeMedium()
                             )
                         }
                     }
@@ -263,6 +288,7 @@ fun HomeScreen(
         }
     }
 
+    // Diálogo de ubicación
     if (showLocationDialog) {
         LocationSelectionDialog(
             currentLocation = currentLocation,
@@ -298,7 +324,7 @@ fun LocationSelectionDialog(
             Text(
                 "Ubicación del servicio",
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = Dimensions.fontSizeLarge()
             )
         },
         text = {
@@ -319,42 +345,42 @@ fun LocationSelectionDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(Dimensions.paddingMedium()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = null,
                             tint = PrimaryBlue,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(Dimensions.iconSizeMedium())
                         )
-                        Spacer(Modifier.width(12.dp))
+                        Spacer(Modifier.width(Dimensions.paddingSmall()))
                         Column {
                             Text(
                                 "Usar ubicación actual",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
+                                fontSize = Dimensions.fontSizeMedium(),
                                 color = TextPrimary
                             )
                             Text(
                                 "Detectar automáticamente",
-                                fontSize = 13.sp,
+                                fontSize = Dimensions.fontSizeSmall(),
                                 color = TextSecondary
                             )
                         }
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Dimensions.paddingMedium()))
 
                 Text(
                     "Ubicaciones guardadas",
-                    fontSize = 14.sp,
+                    fontSize = Dimensions.fontSizeSmall(),
                     fontWeight = FontWeight.Bold,
                     color = TextSecondary
                 )
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Dimensions.paddingSmall()))
 
                 savedLocations.forEach { location ->
                     Card(
@@ -377,26 +403,34 @@ fun LocationSelectionDialog(
                             text = location,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
-                            fontSize = 14.sp,
+                                .padding(Dimensions.paddingSmall()),
+                            fontSize = Dimensions.fontSizeSmall(),
                             color = TextPrimary
                         )
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Dimensions.paddingMedium()))
 
                 OutlinedTextField(
                     value = manualLocation,
                     onValueChange = { manualLocation = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Escribe tu dirección", fontSize = 14.sp) },
+                    placeholder = {
+                        Text(
+                            "Escribe tu dirección",
+                            fontSize = Dimensions.fontSizeSmall()
+                        )
+                    },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PrimaryBlue,
                         unfocusedBorderColor = DividerGray
                     ),
-                    singleLine = true
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = Dimensions.fontSizeMedium()
+                    )
                 )
             }
         },
@@ -405,13 +439,22 @@ fun LocationSelectionDialog(
                 TextButton(
                     onClick = { onLocationSelected(manualLocation) }
                 ) {
-                    Text("Usar esta dirección", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Usar esta dirección",
+                        color = PrimaryBlue,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = Dimensions.fontSizeSmall()
+                    )
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar", color = TextSecondary)
+                Text(
+                    "Cancelar",
+                    color = TextSecondary,
+                    fontSize = Dimensions.fontSizeSmall()
+                )
             }
         },
         containerColor = BackgroundWhite
@@ -422,9 +465,9 @@ fun LocationSelectionDialog(
 fun CategoryCard(category: Category) {
     Card(
         modifier = Modifier
-            .width(120.dp)
-            .height(100.dp),
-        shape = RoundedCornerShape(16.dp),
+            .width(Dimensions.categoryCardWidth())
+            .height(Dimensions.categoryCardHeight()),
+        shape = RoundedCornerShape(Dimensions.paddingMedium()),
         colors = CardDefaults.cardColors(
             containerColor = PrimaryBlue.copy(alpha = 0.1f)
         )
@@ -432,24 +475,24 @@ fun CategoryCard(category: Category) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(Dimensions.paddingSmall()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = category.icon,
-                fontSize = 32.sp
+                fontSize = if (Dimensions.isCompact()) 28.sp else 32.sp
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Dimensions.paddingSmall()))
             Text(
                 text = category.name,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
+                    fontSize = Dimensions.fontSizeSmall()
                 ),
                 color = TextPrimary,
                 maxLines = 2,
-                lineHeight = 16.sp
+                lineHeight = (Dimensions.fontSizeSmall().value + 2).sp
             )
         }
     }
@@ -457,26 +500,29 @@ fun CategoryCard(category: Category) {
 
 @Composable
 fun ContractorCard(contractor: Contractor) {
+    val avatarSize = if (Dimensions.isCompact()) 50.dp else 60.dp
+    val buttonMinWidth = if (Dimensions.isCompact()) 80.dp else 100.dp
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp),
+            .padding(horizontal = Dimensions.paddingMedium()),
+        shape = RoundedCornerShape(Dimensions.paddingMedium()),
         colors = CardDefaults.cardColors(
             containerColor = BackgroundWhite
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
+            defaultElevation = Dimensions.cardElevation()
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(Dimensions.paddingMedium()),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(60.dp),
+                modifier = Modifier.size(avatarSize),
                 shape = RoundedCornerShape(12.dp),
                 color = AccentYellow.copy(alpha = 0.2f)
             ) {
@@ -488,12 +534,13 @@ fun ContractorCard(contractor: Contractor) {
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = AccentYellow
+                        color = AccentYellow,
+                        fontSize = if (Dimensions.isCompact()) 20.sp else 24.sp
                     )
                 }
             }
 
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(Dimensions.paddingMedium()))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -501,7 +548,7 @@ fun ContractorCard(contractor: Contractor) {
                         text = contractor.name,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
+                            fontSize = Dimensions.fontSizeMedium()
                         ),
                         color = TextPrimary
                     )
@@ -516,7 +563,7 @@ fun ContractorCard(contractor: Contractor) {
                                 text = "✓",
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                 color = PrimaryBlue,
-                                fontSize = 10.sp,
+                                fontSize = Dimensions.fontSizeSmall(),
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -527,7 +574,7 @@ fun ContractorCard(contractor: Contractor) {
                     text = contractor.profession,
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextSecondary,
-                    fontSize = 14.sp
+                    fontSize = Dimensions.fontSizeSmall()
                 )
 
                 Spacer(Modifier.height(4.dp))
@@ -537,14 +584,14 @@ fun ContractorCard(contractor: Contractor) {
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
                         tint = AccentYellow,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(Dimensions.iconSizeSmall())
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
                         text = "${contractor.rating} • ${contractor.jobs} trabajos",
                         style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary,
-                        fontSize = 12.sp
+                        fontSize = Dimensions.fontSizeSmall()
                     )
                 }
             }
@@ -555,9 +602,18 @@ fun ContractorCard(contractor: Contractor) {
                     containerColor = AccentYellow,
                     contentColor = TextPrimary
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.widthIn(min = buttonMinWidth),
+                contentPadding = PaddingValues(
+                    horizontal = if (Dimensions.isCompact()) 12.dp else 16.dp,
+                    vertical = 8.dp
+                )
             ) {
-                Text("Contratar", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "Contratar",
+                    fontSize = Dimensions.fontSizeSmall(),
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

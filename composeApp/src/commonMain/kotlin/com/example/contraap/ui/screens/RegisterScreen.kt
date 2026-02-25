@@ -2,6 +2,7 @@ package com.example.contraap.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,20 +17,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.contraap.ui.components.CustomButton
 import com.example.contraap.ui.components.CustomDropdownMenu
-// IMPORTANTE: Verifica que estos nombres de paquete sean correctos según tus carpetas
 import com.example.contraap.ui.components.CustomOutlinedTextField
 import com.example.contraap.ui.components.CustomTopAppBar
 import com.example.contraap.viewmodel.RegisterViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onRegisterSuccess: () -> Unit = {}
 ) {
-    // Creamos una instancia del ViewModel persistente en este Composable
-    val viewModel = remember { RegisterViewModel() }
+    val viewModel: RegisterViewModel = viewModel()
+
     val especialidades = listOf(
         "Servicio de limpieza",
         "Jardinería",
@@ -43,7 +46,12 @@ fun RegisterScreen(
         "Albañilería"
     )
 
-    var expanded by remember { mutableStateOf(false) }
+    // Navegar cuando el registro es exitoso
+    LaunchedEffect(viewModel.registroExitoso) {
+        if (viewModel.registroExitoso) {
+            onRegisterSuccess()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -61,8 +69,15 @@ fun RegisterScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = "Registro de Profesional", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-            Text(text = "Únete a nuestra red de expertos.", color = Color(0xFF1976D2))
+            Text(
+                text = "Registro de Profesional",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Únete a nuestra red de expertos.",
+                color = Color(0xFF1976D2)
+            )
 
             CustomOutlinedTextField(
                 value = viewModel.nombre,
@@ -97,16 +112,11 @@ fun RegisterScreen(
                 isPassword = true
             )
 
-
             CustomDropdownMenu(
                 label = "Especialidad",
-                placeholder = "Selecciona tus oficios", // Plural
+                placeholder = "Selecciona tus oficios",
                 opciones = especialidades,
-
-                // Pasamos la lista del ViewModel
                 selectedItems = viewModel.especialidadesSeleccionadas,
-
-                // Actualizamos el ViewModel con la nueva lista
                 onSelectionChange = { nuevaLista ->
                     viewModel.especialidadesSeleccionadas = nuevaLista
                 }
@@ -121,39 +131,77 @@ fun RegisterScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.CloudUpload, contentDescription = null, tint = Color(0xFF1976D2))
+                    Icon(
+                        Icons.Default.CloudUpload,
+                        contentDescription = null,
+                        tint = Color(0xFF1976D2)
+                    )
                     Text("Sube tu DPI o RTU aquí")
                     Text("PDF, JPG o PNG (Max. 5MB)", fontSize = 12.sp)
                 }
             }
 
+            // Mostrar error si existe
+            if (viewModel.mensajeError != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = viewModel.mensajeError!!,
+                        modifier = Modifier.padding(12.dp),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
             CustomButton(
-                text = "Registrarse",
+                text = if (viewModel.isLoading) "Registrando..." else "Registrarse",
                 onClick = { viewModel.onRegister() },
                 icon = Icons.Default.ArrowForward,
                 buttonColor = Color(0xFFFFC107),
                 textColor = Color.Black,
                 iconTint = Color.Black,
                 height = 56.dp,
-                cornerRadius = 12.dp
+                cornerRadius = 12.dp,
+                enabled = !viewModel.isLoading
             )
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text("¿Ya tienes una cuenta? ")
-                Text(text = "Inicia sesión", color = Color(0xFF1976D2), fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Inicia sesión",
+                    color = Color(0xFF1976D2),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onBack() }
+                )
             }
         }
     }
 
-    // MODAL DE CONFIRMACIÓN USANDO EL ESTADO DEL VIEWMODEL
+    // Modal de confirmación
     if (viewModel.mostrarDialogo) {
         AlertDialog(
-            onDismissRequest = { viewModel.mostrarDialogo = false },
-            title = { Text("Registro") },
-            text = { Text("Usuario registrado correctamente") },
+            onDismissRequest = {
+                viewModel.mostrarDialogo = false
+                onRegisterSuccess()
+            },
+            title = { Text("¡Registro Exitoso!") },
+            text = { Text("Tu cuenta ha sido creada correctamente. Bienvenido a ContrApp.") },
             confirmButton = {
-                TextButton(onClick = { viewModel.mostrarDialogo = false }) {
-                    Text("Aceptar")
+                TextButton(
+                    onClick = {
+                        viewModel.mostrarDialogo = false
+                        onRegisterSuccess()
+                    }
+                ) {
+                    Text("Continuar")
                 }
             }
         )

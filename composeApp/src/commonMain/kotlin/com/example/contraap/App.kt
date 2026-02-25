@@ -16,73 +16,51 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun App() {
+    var showOnboarding by remember { mutableStateOf(true) }
+    var showSplash by remember { mutableStateOf(false) }
+    var showLogin by remember { mutableStateOf(false) }
+    var showRegister by remember { mutableStateOf(false) }
+    var showMain by remember { mutableStateOf(false) }
+
     ContraTheme {
-
-        val navController = rememberNavController()
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-
-            NavHost(
-                navController = navController,
-                startDestination = "onboarding"
-            ) {
-
-                composable("onboarding") {
-                    OnboardingScreen(
-                        onFinish = {
-                            navController.navigate("splash") {
-                                popUpTo("onboarding") { inclusive = true }
-                            }
-                        }
-                    )
+        when {
+            showOnboarding -> OnboardingScreen(
+                onFinish = {
+                    showOnboarding = false
+                    showSplash = true
                 }
-
-                composable("splash") {
-                    SplashScreen(
-                        onFinish = {
-                            navController.navigate("login") {
-                                popUpTo("splash") { inclusive = true }
-                            }
-                        }
-                    )
+            )
+            showSplash -> SplashScreen(
+                onFinish = {
+                    showSplash = false
+                    showLogin = true
                 }
-
-                composable("login") {
-                    LoginScreen(
-                        onLoginSuccess = {
-                            navController.navigate("main") {
-                                popUpTo("login") { inclusive = true }
-                            }
-                        },
-                        onRegisterProfesionalClick = {
-                            navController.navigate("registerProfesional")
-                        },
-                        onRegisterClienteClick = {
-                            navController.navigate("registerCliente")
-                        }
-                    )
+            )
+            showLogin -> LoginScreen(
+                onLoginSuccess = {
+                    showLogin = false
+                    showMain = true
+                },
+                onRegisterProfesionalClick = {
+                    showLogin = false
+                    showRegister = true
+                },
+                onRegisterClienteClick = {
+                    showLogin = false
+                    showRegister = true
                 }
-
-                composable("registerProfesional") {
-                    RegisterScreen(
-                        onBack = { navController.popBackStack() }
-                    )
+            )
+            showRegister -> RegisterScreen(
+                onBack = {
+                    showRegister = false
+                    showLogin = true
+                },
+                onRegisterSuccess = {
+                    showRegister = false
+                    showMain = true
                 }
-
-                composable("main") {
-                    MainScreen()
-                }
-
-                composable("registerCliente") {
-                    JoinContraAppScreen(
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-            }
+            )
+            showMain -> MainScreen()
         }
     }
 }

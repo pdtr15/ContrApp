@@ -11,7 +11,11 @@ import com.example.contraap.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
+
     private val authRepository = AuthRepository()
+
+    // 🔥 ROL DINÁMICO (AGREGAR ESTO)
+    var role by mutableStateOf<UserRole?>(null)
 
     // Estados observables
     var nombre by mutableStateOf("")
@@ -26,7 +30,12 @@ class RegisterViewModel : ViewModel() {
     var registroExitoso by mutableStateOf(false)
 
     fun onRegister() {
-        // Validaciones
+
+        if (role == null) {
+            mensajeError = "Error interno: rol no definido"
+            return
+        }
+
         if (nombre.isBlank()) {
             mensajeError = "El nombre es requerido"
             return
@@ -52,27 +61,29 @@ class RegisterViewModel : ViewModel() {
             return
         }
 
-        // Registro
         isLoading = true
         mensajeError = null
 
         viewModelScope.launch {
+
             authRepository.signUp(
                 email = correo.trim(),
                 password = password,
                 fullName = nombre.trim(),
-                role = UserRole.CONTRATISTA
+                role = role!!  // 🔥 YA NO HARDCODEADO
             ).fold(
+
                 onSuccess = { userProfile ->
-                    // Crear perfil de contratista
-                    createContractorProfile(userProfile, especialidadesSeleccionadas.first())
+                    createContractorProfile(
+                        userProfile,
+                        especialidadesSeleccionadas.first()
+                    )
                 },
+
                 onFailure = { error ->
                     isLoading = false
                     mensajeError = when {
                         error.message?.contains("already registered") == true ->
-                            "Este email ya está registrado"
-                        error.message?.contains("User already registered") == true ->
                             "Este email ya está registrado"
                         error.message?.contains("Invalid email") == true ->
                             "Email inválido"
@@ -85,15 +96,18 @@ class RegisterViewModel : ViewModel() {
         }
     }
 
-    private suspend fun createContractorProfile(userProfile: UserProfile, especialidad: String) {
-        // Obtener el ID de la categoría según la especialidad
+    private suspend fun createContractorProfile(
+        userProfile: UserProfile,
+        especialidad: String
+    ) {
+
         val categoryId = when (especialidad) {
             "Servicio de limpieza" -> 1
             "Jardinería" -> 2
             "Electricista" -> 3
             "Plomería" -> 4
             "Mecánico Moto/Carros" -> 5
-            "Tutorías (Matemáticas/ESL)" -> 6
+            "Tutorías" -> 6
             "Pintor" -> 7
             "Línea blanca" -> 8
             "Fumigadores" -> 9
@@ -106,11 +120,13 @@ class RegisterViewModel : ViewModel() {
             categoryId = categoryId,
             phone = telefono.trim()
         ).fold(
+
             onSuccess = {
                 isLoading = false
                 registroExitoso = true
                 mostrarDialogo = true
             },
+
             onFailure = { error ->
                 isLoading = false
                 mensajeError = "Error al crear perfil de contratista: ${error.message}"
@@ -132,5 +148,6 @@ class RegisterViewModel : ViewModel() {
         mensajeError = null
         isLoading = false
         registroExitoso = false
+        role = null
     }
 }

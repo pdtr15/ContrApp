@@ -3,7 +3,6 @@ package com.example.contraap.data.repository
 import com.example.contraap.data.SupabaseClient
 import com.example.contraap.data.models.UserProfile
 import com.example.contraap.data.models.UserRole
-import com.example.contraap.data.models.ContractorProfile
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.from
@@ -90,6 +89,29 @@ class AuthRepository {
                 )
 
             // Actualizar teléfono en profiles
+            supabase.from("profiles")
+                .update(
+                    buildJsonObject {
+                        put("phone", phone)
+                    }
+                ) {
+                    filter {
+                        eq("id", userId)
+                    }
+                }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Actualizar teléfono del usuario (para clientes)
+    suspend fun updateUserPhone(
+        userId: String,
+        phone: String
+    ): Result<Unit> {
+        return try {
             supabase.from("profiles")
                 .update(
                     buildJsonObject {

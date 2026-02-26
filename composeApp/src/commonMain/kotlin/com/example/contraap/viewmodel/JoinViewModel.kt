@@ -1,27 +1,124 @@
 package com.example.contraap.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.contraap.data.models.UserRole
+import com.example.contraap.data.repository.AuthRepository
+import kotlinx.coroutines.launch
 
-class JoinViewModel {
-    // Estados específicos para el registro de usuario general
+class JoinViewModel : ViewModel() {
+
+    private val authRepository = AuthRepository()
+
+    // 🔥 ROL DINÁMICO
+    var role by mutableStateOf<UserRole?>(null)
+
+    // Estados del formulario
     var nombre by mutableStateOf("")
     var correo by mutableStateOf("")
-
     var telefono by mutableStateOf("")
     var password by mutableStateOf("")
 
-    // Control de UI
+    // Control UI
     var mostrarDialogo by mutableStateOf(false)
+    var mensajeError by mutableStateOf<String?>(null)
+    var isLoading by mutableStateOf(false)
+    var registroExitoso by mutableStateOf(false)
 
     fun onCrearCuenta() {
-        if (nombre.isNotBlank() && correo.contains("@") && password.length >= 6) {
-            // Aquí simularías la llamada al servicio de autenticación
-            println("Creando cuenta de usuario: $nombre ($correo)")
-            mostrarDialogo = true
-        } else {
-            println("Error: Datos incompletos o inválidos")
+
+        if (role == null) {
+            mensajeError = "Error interno: rol no definido"
+            return
         }
+
+        if (nombre.isBlank()) {
+            mensajeError = "El nombre es requerido"
+            return
+        }
+
+        if (correo.isBlank() || !correo.contains("@")) {
+            mensajeError = "Ingresa un correo válido"
+            return
+        }
+
+        if (telefono.isBlank()) {
+            mensajeError = "El teléfono es requerido"
+            return
+        }
+
+        if (password.length < 6) {
+            mensajeError = "La contraseña debe tener al menos 6 caracteres"
+            return
+        }
+
+        isLoading = true
+        mensajeError = null
+
+        viewModelScope.launch {
+
+            authRepository.signUp(
+                email = correo.trim(),
+                password = password,
+                fullName = nombre.trim(),
+                role = role!!   // 🔥 AQUÍ YA NO ES FIJO
+            ).fold(
+
+                onSuccess = { userProfile ->
+                    updateUserPhone(userProfile.id)
+                },
+
+                onFailure = { error ->
+                    isLoading = false
+                    mensajeError = when {
+                        error.message?.contains("already registered") == true ->
+                            "Este email ya está registrado"
+                        error.message?.contains("Invalid email") == true ->
+                            "Email inválido"
+                        error.message?.contains("Password") == true ->
+                            "La contraseña debe tener al menos 6 caracteres"
+                        else -> "Error al registrar: ${error.message}"
+                    }
+                }
+            )
+        }
+    }
+
+    private suspend fun updateUserPhone(userId: String) {
+
+        authRepository.updateUserPhone(
+            userId = userId,
+            phone = telefono.trim()
+        ).fold(
+
+            onSuccess = {
+                isLoading = false
+                registroExitoso = true
+                mostrarDialogo = true
+            },
+
+            onFailure = {
+                isLoading = false
+                registroExitoso = true
+                mostrarDialogo = true
+            }
+        )
+    }
+
+    fun limpiarError() {
+        mensajeError = null
+    }
+
+    fun resetState() {
+        nombre = ""
+        correo = ""
+        telefono = ""
+        password = ""
+        mostrarDialogo = false
+        mensajeError = null
+        isLoading = false
+        registroExitoso = false
+        role = null
     }
 }

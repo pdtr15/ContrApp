@@ -1,96 +1,75 @@
 package com.example.contraap.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.contraap.ui.components.CustomButton
-import com.example.contraap.ui.components.CustomOutlinedTextField
-import com.example.contraap.ui.components.CustomTopAppBar
-import com.example.contraap.ui.components.SocialButton
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.contraap.data.models.UserRole
+import com.example.contraap.ui.components.*
 import com.example.contraap.viewmodel.JoinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JoinContraAppScreen(
-    onBack: () -> Unit
+fun JoinContrAppScreen(
+    role: UserRole,
+    onBack: () -> Unit,
+    onRegisterSuccess: () -> Unit
 ) {
-    val viewModel = remember { JoinViewModel() }
-    val scrollState = rememberScrollState()
+
+    val viewModel: JoinViewModel = viewModel()
+
+    // 🔥 ASIGNAR ROL
+    LaunchedEffect(Unit) {
+        viewModel.role = role
+    }
+
+    LaunchedEffect(viewModel.registroExitoso) {
+        if (viewModel.registroExitoso) {
+            onRegisterSuccess()
+        }
+    }
 
     Scaffold(
         topBar = {
             CustomTopAppBar(
-                title = "ContrApp",
-                onBackClick = { onBack() }
+                title = "Registro Cliente",
+                onBackClick = onBack
             )
         }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Surface(
-                modifier = Modifier.size(100.dp),
-                color = Color(0xFFFFC107),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Logo",
-                        modifier = Modifier.size(60.dp),
-                        tint = Color.White
-                    )
-                }
-            }
-
-            Text(
-                text = "Únete a ContrApp",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Text(
-                text = "Encuentra a los mejores contratistas para tu hogar o negocio.",
-                textAlign = TextAlign.Center,
-                color = Color.Gray,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(top = 8.dp)
-            )
 
             CustomOutlinedTextField(
                 value = viewModel.nombre,
                 onValueChange = { viewModel.nombre = it },
-                label = "Nombre Completo",
-                placeholder = "Ej. Juan Pérez",
+                label = "Nombre",
                 icon = Icons.Default.Person
             )
 
             CustomOutlinedTextField(
                 value = viewModel.correo,
                 onValueChange = { viewModel.correo = it },
-                label = "Correo Electrónico",
-                placeholder = "ejemplo@correo.com",
+                label = "Correo",
                 icon = Icons.Default.Email
             )
 
@@ -98,7 +77,6 @@ fun JoinContraAppScreen(
                 value = viewModel.telefono,
                 onValueChange = { viewModel.telefono = it },
                 label = "Teléfono",
-                placeholder = "+502 0000 0000",
                 icon = Icons.Default.Phone
             )
 
@@ -106,49 +84,22 @@ fun JoinContraAppScreen(
                 value = viewModel.password,
                 onValueChange = { viewModel.password = it },
                 label = "Contraseña",
-                placeholder = "Crea una contraseña",
                 icon = Icons.Default.Visibility,
                 isPassword = true
             )
 
+            if (viewModel.mensajeError != null) {
+                Text(
+                    text = viewModel.mensajeError!!,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
             CustomButton(
-                text = "Crear Cuenta",
+                text = if (viewModel.isLoading) "Creando cuenta..." else "Crear Cuenta",
                 onClick = { viewModel.onCrearCuenta() },
-                buttonColor = Color(0xFFFFC107)
+                enabled = !viewModel.isLoading
             )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
-                Text("  o regístrate con  ", color = Color.Gray, fontSize = 12.sp)
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                SocialButton(
-                    text = "Google",
-                    icon = rememberVectorPainter(Icons.Default.AccountCircle), // Placeholder
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                )
-                SocialButton(
-                    text = "Facebook",
-                    icon = rememberVectorPainter(Icons.Default.Facebook),
-                    onClick = { },
-                    modifier = Modifier.weight(1f),
-                    backgroundColor = Color(0xFF1877F2),
-                    textColor = Color.White
-                )
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("¿Ya tienes una cuenta? ", fontSize = 14.sp, color = Color.Gray)
-                TextButton(onClick = { }, contentPadding = PaddingValues(0.dp)) {
-                    Text("Iniciar sesión", color = Color(0xFFFFC107), fontWeight = FontWeight.Bold)
-                }
-            }
         }
     }
 }

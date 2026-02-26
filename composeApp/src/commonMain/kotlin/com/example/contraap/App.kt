@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.contraap.ui.screens.contractor.ContractorDashboardScreen
 import com.example.contraap.ui.screens.contractor.JobRequestDetailScreen
+import com.example.contraap.data.models.UserRole
 
 @Composable
 fun App() {
@@ -71,6 +72,12 @@ fun App() {
 
                 composable("registerProfesional") {
                     RegisterScreen(
+                        role = UserRole.CONTRATISTA,
+                        onRegisterSuccess = {
+                            navController.navigate("mainContratista") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        },
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -80,7 +87,13 @@ fun App() {
                 }
 
                 composable("registerCliente") {
-                    JoinContraAppScreen(
+                    RegisterScreen(
+                        role = UserRole.CLIENTE,
+                        onRegisterSuccess = {
+                            navController.navigate("main") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        },
                         onBack = { navController.popBackStack() }
                     )
                 }

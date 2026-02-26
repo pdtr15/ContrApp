@@ -1,82 +1,103 @@
 package com.example.contraap
 
 import androidx.compose.runtime.*
-import com.example.contraap.data.models.UserRole
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+// Asegúrate de importar tus pantallas
+import com.example.contraap.ui.screens.*
 import com.example.contraap.ui.onboarding.OnboardingScreen
 import com.example.contraap.ui.splash.SplashScreen
-import com.example.contraap.ui.screens.*
 import com.example.contraap.ui.theme.ContraTheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import com.example.contraap.ui.screens.contractor.ContractorDashboardScreen
+import com.example.contraap.ui.screens.contractor.JobRequestDetailScreen
 
 @Composable
 fun App() {
-
-    var showOnboarding by remember { mutableStateOf(true) }
-    var showSplash by remember { mutableStateOf(false) }
-    var showLogin by remember { mutableStateOf(false) }
-    var showRegister by remember { mutableStateOf(false) }
-    var showJoin by remember { mutableStateOf(false) }
-    var showMain by remember { mutableStateOf(false) }
-
     ContraTheme {
 
-        when {
+        val navController = rememberNavController()
 
-            showOnboarding -> OnboardingScreen(
-                onFinish = {
-                    showOnboarding = false
-                    showSplash = true
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+
+            NavHost(
+                navController = navController,
+                startDestination = "mainContratista"
+            ) {
+
+                composable("onboarding") {
+                    OnboardingScreen(
+                        onFinish = {
+                            navController.navigate("splash") {
+                                popUpTo("onboarding") { inclusive = true }
+                            }
+                        }
+                    )
                 }
-            )
 
-            showSplash -> SplashScreen(
-                onFinish = {
-                    showSplash = false
-                    showLogin = true
+                composable("splash") {
+                    SplashScreen(
+                        onFinish = {
+                            navController.navigate("login") {
+                                popUpTo("splash") { inclusive = true }
+                            }
+                        }
+                    )
                 }
-            )
 
-            showLogin -> LoginScreen(
-                onLoginSuccess = {
-                    showLogin = false
-                    showMain = true
-                },
-                onRegisterProfesionalClick = {
-                    showLogin = false
-                    showRegister = true
-                },
-                onRegisterClienteClick = {
-                    showLogin = false
-                    showJoin = true
+                composable("login") {
+                    LoginScreen(
+                        onLoginSuccess = {
+                            navController.navigate("main") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        },
+                        onRegisterProfesionalClick = {
+                            navController.navigate("registerProfesional")
+                        },
+                        onRegisterClienteClick = {
+                            navController.navigate("registerCliente")
+                        }
+                    )
                 }
-            )
 
-            // 🔵 REGISTRO CONTRATISTA
-            showRegister -> RegisterScreen(
-                role = UserRole.CONTRATISTA,
-                onBack = {
-                    showRegister = false
-                    showLogin = true
-                },
-                onRegisterSuccess = {
-                    showRegister = false
-                    showMain = true
+                composable("registerProfesional") {
+                    RegisterScreen(
+                        onBack = { navController.popBackStack() }
+                    )
                 }
-            )
 
-            // 🟡 REGISTRO CLIENTE
-            showJoin -> JoinContrAppScreen(
-                role = UserRole.CLIENTE,   // 🔥 AQUÍ ESTABA EL ERROR
-                onBack = {
-                    showJoin = false
-                    showLogin = true
-                },
-                onRegisterSuccess = {
-                    showJoin = false
-                    showMain = true
+                composable("main") {
+                    MainScreen()
                 }
-            )
 
-            showMain -> MainScreen()
+                composable("registerCliente") {
+                    JoinContraAppScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable("mainContratista") {
+                    ContractorDashboardScreen(navController = navController) // <--- Llamamos a la pantalla que acabamos de crear
+                }
+
+                // --- DETALLE DE LA SOLICITUD ---
+                composable("job_detail") {
+                    JobRequestDetailScreen(
+                        onBackClick = {
+                            navController.popBackStack() // <--- Regresa al panel
+                        }
+                    )
+                }
+            }
         }
     }
 }

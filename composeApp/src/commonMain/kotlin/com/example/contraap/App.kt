@@ -4,7 +4,6 @@ import androidx.compose.runtime.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-// Asegúrate de importar tus pantallas
 import com.example.contraap.ui.screens.*
 import com.example.contraap.ui.onboarding.OnboardingScreen
 import com.example.contraap.ui.splash.SplashScreen
@@ -13,9 +12,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.contraap.ui.screens.contractor.ContractorDashboardScreen
-import com.example.contraap.ui.screens.contractor.JobRequestDetailScreen
+import com.example.contraap.ui.navigation.ContractorNavGraph  // ← NUEVO
 import com.example.contraap.data.models.UserRole
+
 @Composable
 fun App() {
     ContraTheme {
@@ -30,7 +29,7 @@ fun App() {
 
             NavHost(
                 navController = navController,
-                startDestination = "mainContratista"
+                startDestination = "onboarding"
             ) {
 
                 composable("onboarding") {
@@ -55,9 +54,15 @@ fun App() {
 
                 composable("login") {
                     LoginScreen(
-                        onLoginSuccess = {
-                            navController.navigate("main") {
-                                popUpTo("login") { inclusive = true }
+                        onLoginSuccess = { role ->
+                            if (role == UserRole.CONTRATISTA) {
+                                navController.navigate("mainContratista") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            } else {
+                                navController.navigate("main") {
+                                    popUpTo("login") { inclusive = true }
+                                }
                             }
                         },
                         onRegisterProfesionalClick = {
@@ -98,17 +103,10 @@ fun App() {
                 }
 
                 composable("mainContratista") {
-                    ContractorDashboardScreen(navController = navController) // <--- Llamamos a la pantalla que acabamos de crear
+                    ContractorNavGraph()  // ← CAMBIADO: antes era ContractorDashboardScreen
                 }
 
-                // --- DETALLE DE LA SOLICITUD ---
-                composable("job_detail") {
-                    JobRequestDetailScreen(
-                        onBackClick = {
-                            navController.popBackStack() // <--- Regresa al panel
-                        }
-                    )
-                }
+                // ← ELIMINADO: job_detail ya vive dentro de ContractorNavGraph
             }
         }
     }

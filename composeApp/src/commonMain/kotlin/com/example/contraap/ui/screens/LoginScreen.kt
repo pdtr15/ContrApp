@@ -33,13 +33,14 @@ import com.example.contraap.ui.components.PrimaryButton
 import com.example.contraap.ui.theme.*
 import com.example.contraap.viewmodel.LoginViewModel
 import org.jetbrains.compose.resources.painterResource
+import com.example.contraap.data.models.UserRole
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit = {},
-    onRegisterProfesionalClick: () -> Unit = {},
-    onRegisterClienteClick: () -> Unit = {},
+    onLoginSuccess: (UserRole) -> Unit,
+    onRegisterProfesionalClick: () -> Unit,
+    onRegisterClienteClick: () -> Unit,
     onForgotPasswordClick: () -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
@@ -48,9 +49,11 @@ fun LoginScreen(
 
     // Navegar cuando el login es exitoso
     LaunchedEffect(uiState.isLoginSuccessful) {
-        if (uiState.isLoginSuccessful) {
-            onLoginSuccess()
-            viewModel.resetLoginSuccess()
+        uiState.currentUser?.let { user ->
+            if (uiState.isLoginSuccessful) {
+                onLoginSuccess(user.role)
+                viewModel.resetLoginSuccess()
+            }
         }
     }
 

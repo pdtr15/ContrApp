@@ -47,24 +47,17 @@ kotlin {
 
                 implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
                 implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
-
             }
         }
 
         val androidMain by getting {
             dependencies {
-
                 implementation(libs.androidx.activity.compose)
                 implementation("androidx.core:core-ktx:1.12.0")
-                implementation("com.google.android.gms:play-services-location:21.1.0")
-
-                // Android Ktor engine
                 implementation("io.ktor:ktor-client-android:2.3.7")
-
-                // Android-only lifecycle + navigation
                 implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
                 implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
-                implementation("io.ktor:ktor-client-android:2.3.7")
+                implementation("com.google.android.gms:play-services-location:21.1.0")
             }
         }
 
@@ -73,6 +66,14 @@ kotlin {
             dependencies {
                 implementation("io.ktor:ktor-client-darwin:2.3.7")
             }
+        }
+
+        val iosArm64Main by getting {
+            dependsOn(iosMain)
+        }
+
+        val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
         }
     }
 }

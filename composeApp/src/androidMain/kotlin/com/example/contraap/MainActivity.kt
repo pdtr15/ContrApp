@@ -13,6 +13,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Inicializar appContext antes de cualquier otra cosa
+        appContext = applicationContext
+
         enableEdgeToEdge()
 
         WindowCompat.setDecorFitsSystemWindows(window, false)

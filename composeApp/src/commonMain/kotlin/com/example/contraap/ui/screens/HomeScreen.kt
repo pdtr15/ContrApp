@@ -14,12 +14,15 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.contraap.ui.theme.*
+import com.example.contraap.location.LocationManager
+import com.example.contraap.location.RequestLocationPermission
 
 data class Category(val id: Int, val name: String, val icon: String)
 data class Contractor(
@@ -36,8 +39,49 @@ data class Contractor(
 fun HomeScreen(
     onRequestServiceClick: () -> Unit = {}
 ) {
-    var currentLocation by remember { mutableStateOf("Guatemala City, Guatemala") }
+    val locationManager = remember { LocationManager() }
+
+    var currentLocation by remember { mutableStateOf("Detectando ubicación...") }
     var showLocationDialog by remember { mutableStateOf(false) }
+    var loadingLocation by remember { mutableStateOf(false) }
+    var shouldRequestPermission by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    // Función reutilizable para obtener ubicación
+    suspend fun fetchLocation() {
+        loadingLocation = true
+        locationManager.getCurrentLocation().fold(
+            onSuccess = { locationData ->
+                currentLocation = locationData.address
+                loadingLocation = false
+            },
+            onFailure = {
+                currentLocation = "Ubicación no disponible"
+                loadingLocation = false
+            }
+        )
+    }
+
+    // Si necesita pedir permiso, muestra el diálogo del sistema
+    if (shouldRequestPermission) {
+        RequestLocationPermission { granted: Boolean ->
+            shouldRequestPermission = false
+            if (granted) {
+                scope.launch { fetchLocation() }
+            } else {
+                currentLocation = "Sin permiso de ubicación"
+            }
+        }
+    }
+
+    // Al entrar: si ya tiene permiso obtiene ubicación, si no la pide
+    LaunchedEffect(Unit) {
+        if (locationManager.hasLocationPermission()) {
+            fetchLocation()
+        } else {
+            shouldRequestPermission = true
+        }
+    }
 
     val categories = remember {
         listOf(
@@ -243,11 +287,16 @@ fun HomeScreen(
     if (showLocationDialog) {
         LocationSelectionDialog(
             currentLocation = currentLocation,
+            locationManager = locationManager,
             onLocationSelected = { newLocation: String ->
                 currentLocation = newLocation
                 showLocationDialog = false
             },
-            onDismiss = { showLocationDialog = false }
+            onDismiss = { showLocationDialog = false },
+            onRequestPermission = {
+                showLocationDialog = false
+                shouldRequestPermission = true
+            }
         )
     }
 }
@@ -255,10 +304,15 @@ fun HomeScreen(
 @Composable
 fun LocationSelectionDialog(
     currentLocation: String,
+    locationManager: LocationManager,
     onLocationSelected: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onRequestPermission: () -> Unit
 ) {
     var manualLocation by remember { mutableStateOf("") }
+    var gpsLoading by remember { mutableStateOf(false) }
+    var gpsError by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     val savedLocations = remember {
         listOf(
@@ -285,8 +339,25 @@ fun LocationSelectionDialog(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            onLocationSelected("Ubicación GPS (pendiente)")
+                        .clickable(enabled = !gpsLoading) {
+                            gpsError = null
+                            if (!locationManager.hasLocationPermission()) {
+                                onRequestPermission()
+                            } else {
+                                gpsLoading = true
+                                scope.launch {
+                                    locationManager.getCurrentLocation().fold(
+                                        onSuccess = { locationData ->
+                                            gpsLoading = false
+                                            onLocationSelected(locationData.address)
+                                        },
+                                        onFailure = { error ->
+                                            gpsLoading = false
+                                            gpsError = error.message ?: "Error desconocido"
+                                        }
+                                    )
+                                }
+                            }
                         },
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
@@ -299,12 +370,20 @@ fun LocationSelectionDialog(
                             .padding(Dimensions.paddingMedium()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = PrimaryBlue,
-                            modifier = Modifier.size(Dimensions.iconSizeMedium())
-                        )
+                        if (gpsLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(Dimensions.iconSizeMedium()),
+                                color = PrimaryBlue,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = PrimaryBlue,
+                                modifier = Modifier.size(Dimensions.iconSizeMedium())
+                            )
+                        }
                         Spacer(Modifier.width(Dimensions.paddingSmall()))
                         Column {
                             Text(
@@ -314,12 +393,22 @@ fun LocationSelectionDialog(
                                 color = TextPrimary
                             )
                             Text(
-                                "Detectar automáticamente",
+                                if (gpsLoading) "Obteniendo ubicación..." else "Detectar automáticamente",
                                 fontSize = Dimensions.fontSizeSmall(),
                                 color = TextSecondary
                             )
                         }
                     }
+                }
+
+                if (gpsError != null) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = gpsError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = Dimensions.fontSizeSmall(),
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
                 }
 
                 Spacer(Modifier.height(Dimensions.paddingMedium()))

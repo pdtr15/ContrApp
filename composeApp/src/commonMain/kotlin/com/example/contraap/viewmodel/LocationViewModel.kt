@@ -1,12 +1,14 @@
 package com.example.contraap.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.contraap.location.LocationData
 import com.example.contraap.location.LocationManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class LocationUiState(
     val currentLocation: LocationData? = null,
@@ -35,25 +37,28 @@ class LocationViewModel(
     fun requestCurrentLocation() {
         _uiState.update { it.copy(isLoading = true, error = null) }
 
-        locationManager.getCurrentLocation(
-            onSuccess = { location ->
-                _uiState.update {
-                    it.copy(
-                        currentLocation = location,
-                        isLoading = false,
-                        error = null
-                    )
+        viewModelScope.launch {
+            locationManager.getCurrentLocation().fold(
+                onSuccess = { location ->
+                    _uiState.update {
+                        it.copy(
+                            currentLocation = location,
+                            isLoading = false,
+                            error = null,
+                            permissionGranted = true
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message ?: "Error desconocido"
+                        )
+                    }
                 }
-            },
-            onError = { errorMessage ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = errorMessage
-                    )
-                }
-            }
-        )
+            )
+        }
     }
 
     fun clearError() {

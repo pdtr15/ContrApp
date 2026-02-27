@@ -6,11 +6,9 @@ data class LocationData(
     val address: String
 )
 
-expect class LocationManager {
-    fun getCurrentLocation(
-        onSuccess: (LocationData) -> Unit,
-        onError: (String) -> Unit
-    )
+expect class LocationManager() {
+
+    suspend fun getCurrentLocation(): Result<LocationData>
 
     fun hasLocationPermission(): Boolean
 }

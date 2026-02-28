@@ -24,15 +24,22 @@ class AuthRepository {
             val userId = supabase.auth.currentUserOrNull()?.id
                 ?: return Result.failure(Exception("No se pudo obtener el ID del usuario"))
 
-            val profile = supabase.from("profiles")
-                .select(columns = Columns.ALL) {
-                    filter {
-                        eq("id", userId)
+            try {
+                val profile = supabase.from("profiles")
+                    .select(columns = Columns.raw(
+                        "id,email,full_name,first_name,last_name,phone," +
+                                "role::text,avatar_url,is_verified,is_active," +
+                                "rating,total_jobs,created_at,updated_at"
+                    )) {
+                        filter { eq("id", userId) }
                     }
-                }
-                .decodeSingle<UserProfile>()
+                    .decodeSingle<UserProfile>()
 
-            Result.success(profile)
+                Result.success(profile)
+            } catch (profileError: Exception) {
+                Result.failure(Exception("Error al leer perfil: ${profileError::class.simpleName} - ${profileError.message}"))
+            }
+
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -146,10 +153,12 @@ class AuthRepository {
                 ?: return Result.success(null)
 
             val profile = supabase.from("profiles")
-                .select(columns = Columns.ALL) {
-                    filter {
-                        eq("id", userId)
-                    }
+                .select(columns = Columns.raw(
+                    "id,email,full_name,first_name,last_name,phone," +
+                            "role::text,avatar_url,is_verified,is_active," +
+                            "rating,total_jobs,created_at,updated_at"
+                )) {
+                    filter { eq("id", userId) }
                 }
                 .decodeSingle<UserProfile>()
 

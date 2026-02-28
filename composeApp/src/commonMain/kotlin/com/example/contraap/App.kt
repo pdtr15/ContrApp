@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.contraap.ui.navigation.ContractorNavGraph  // ← NUEVO
 import com.example.contraap.data.models.UserRole
+import com.example.contraap.ui.screens.admin.AdminValidationScreen
 
 @Composable
 fun App() {
@@ -55,13 +56,21 @@ fun App() {
                 composable("login") {
                     LoginScreen(
                         onLoginSuccess = { role ->
-                            if (role == UserRole.CONTRATISTA) {
-                                navController.navigate("mainContratista") {
-                                    popUpTo("login") { inclusive = true }
+                            when (role) {
+                                UserRole.CONTRATISTA -> {
+                                    navController.navigate("mainContratista") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
-                            } else {
-                                navController.navigate("main") {
-                                    popUpTo("login") { inclusive = true }
+                                UserRole.ADMIN -> {
+                                    navController.navigate("adminPanel") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                }
+                                else -> {
+                                    navController.navigate("main") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             }
                         },
@@ -103,10 +112,19 @@ fun App() {
                 }
 
                 composable("mainContratista") {
-                    ContractorNavGraph()  // ← CAMBIADO: antes era ContractorDashboardScreen
+                    ContractorNavGraph()
                 }
 
-                // ← ELIMINADO: job_detail ya vive dentro de ContractorNavGraph
+                composable("adminPanel") {
+                    AdminValidationScreen(
+                        onBack = {
+                            navController.navigate("login") {
+                                popUpTo("adminPanel") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
             }
         }
     }

@@ -92,16 +92,16 @@ class LoginViewModel : ViewModel() {
                     }
                 },
                 onFailure = { error ->
+                    // Log detallado del error
+                    println("LOGIN ERROR CLASS: ${error::class.qualifiedName}")
+                    println("LOGIN ERROR MSG: ${error.message}")
+                    println("LOGIN ERROR CAUSE: ${error.cause}")
+                    error.printStackTrace()
+
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = when {
-                                error.message?.contains("Invalid login credentials") == true ->
-                                    "Email o contraseña incorrectos"
-                                error.message?.contains("Email not confirmed") == true ->
-                                    "Por favor confirma tu email"
-                                else -> "Error al iniciar sesión: ${error.message}"
-                            }
+                            errorMessage = "Error: ${error.message}"
                         )
                     }
                 }

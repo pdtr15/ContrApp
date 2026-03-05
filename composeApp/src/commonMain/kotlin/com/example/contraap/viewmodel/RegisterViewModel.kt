@@ -130,8 +130,29 @@ class RegisterViewModel : ViewModel() {
             categoryId = categoryId,
             phone = telefono.trim()
         ).fold(
-
             onSuccess = {
+                // Subir documento a Storage si existe y obtener URL
+                var documentUrl: String? = null
+                val bytes = documentoBytes
+                val nombre = documentoNombre
+                if (bytes != null && nombre != null) {
+                    authRepository.uploadDocument(
+                        userId = userProfile.id,
+                        fileName = nombre,
+                        bytes = bytes
+                    ).fold(
+                        onSuccess = { url -> documentUrl = url },
+                        onFailure = { /* continuar sin URL */ }
+                    )
+                }
+
+                // Guardar DPI y URL siempre que haya al menos uno
+                authRepository.updateUserDocuments(
+                    userId = userProfile.id,
+                    dpi = dpi.trim().takeIf { it.isNotBlank() },
+                    documentUrl = documentUrl
+                )
+
                 isLoading = false
                 registroExitoso = true
                 mostrarDialogo = true

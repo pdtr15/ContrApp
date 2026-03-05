@@ -93,14 +93,26 @@ class JoinViewModel : ViewModel() {
             userId = userId,
             phone = telefono.trim()
         ).fold(
-
             onSuccess = {
+                // Guardar DPI si fue ingresado
+                if (dpi.isNotBlank()) {
+                    authRepository.updateUserDocuments(
+                        userId = userId,
+                        dpi = dpi.trim()
+                    )
+                }
                 isLoading = false
                 registroExitoso = true
                 mostrarDialogo = true
             },
-
             onFailure = {
+                // Aunque falle el teléfono, intentar guardar DPI
+                if (dpi.isNotBlank()) {
+                    authRepository.updateUserDocuments(
+                        userId = userId,
+                        dpi = dpi.trim()
+                    )
+                }
                 isLoading = false
                 registroExitoso = true
                 mostrarDialogo = true

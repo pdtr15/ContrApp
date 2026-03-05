@@ -7,6 +7,7 @@ import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.storage.storage
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -29,7 +30,7 @@ class AuthRepository {
                     .select(columns = Columns.raw(
                         "id,email,full_name,first_name,last_name,phone," +
                                 "role::text,avatar_url,is_verified,is_active," +
-                                "rating,total_jobs,created_at,updated_at"
+                                "rating,total_jobs,dpi,document_url,created_at,updated_at"
                     )) {
                         filter { eq("id", userId) }
                     }
@@ -156,13 +157,52 @@ class AuthRepository {
                 .select(columns = Columns.raw(
                     "id,email,full_name,first_name,last_name,phone," +
                             "role::text,avatar_url,is_verified,is_active," +
-                            "rating,total_jobs,created_at,updated_at"
+                            "rating,total_jobs,dpi,document_url,created_at,updated_at"
                 )) {
                     filter { eq("id", userId) }
                 }
                 .decodeSingle<UserProfile>()
 
             Result.success(profile)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Actualizar DPI y documento del usuario
+    suspend fun updateUserDocuments(
+        userId: String,
+        dpi: String? = null,
+        documentUrl: String? = null
+    ): Result<Unit> {
+        return try {
+            supabase.from("profiles")
+                .update(
+                    buildJsonObject {
+                        if (dpi != null) put("dpi", dpi)
+                        if (documentUrl != null) put("document_url", documentUrl)
+                    }
+                ) {
+                    filter { eq("id", userId) }
+                }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            println("updateUserDocuments ERROR: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    // Subir documento a Supabase Storage y retornar la URL pública
+    suspend fun uploadDocument(
+        userId: String,
+        fileName: String,
+        bytes: ByteArray
+    ): Result<String> {
+        return try {
+            val path = "$userId/$fileName"
+            supabase.storage["documents"].upload(path, bytes, upsert = true)
+            val url = supabase.storage["documents"].publicUrl(path)
+            Result.success(url)
         } catch (e: Exception) {
             Result.failure(e)
         }

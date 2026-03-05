@@ -36,6 +36,9 @@ data class UserProfile(
     val rating: Double = 0.0,
     @SerialName("total_jobs")
     val totalJobs: Int = 0,
+    val dpi: String? = null,
+    @SerialName("document_url")
+    val documentUrl: String? = null,
     @SerialName("created_at")
     val createdAt: String? = null,
     @SerialName("updated_at")

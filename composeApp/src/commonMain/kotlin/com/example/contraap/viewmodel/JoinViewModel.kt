@@ -20,6 +20,8 @@ class JoinViewModel : ViewModel() {
     var telefono by mutableStateOf("")
     var password by mutableStateOf("")
 
+    var dpi by mutableStateOf("")
+
     // Control UI
     var mostrarDialogo by mutableStateOf(false)
     var mensajeError by mutableStateOf<String?>(null)

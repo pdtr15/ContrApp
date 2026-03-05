@@ -113,6 +113,21 @@ fun RegisterScreen(
                 }
             )
 
+            CustomOutlinedTextField(
+                value = viewModel.dpi,
+                onValueChange = { viewModel.dpi = it },
+                label = "DPI",
+                icon = Icons.Default.Person
+            )
+
+            DocumentPickerBox(
+                selectedFileName = viewModel.documentoNombre,
+                onFileSelected = { name, bytes ->
+                    viewModel.documentoNombre = name
+                    viewModel.documentoBytes = bytes
+                }
+            )
+
             if (viewModel.mensajeError != null) {
                 Text(
                     text = viewModel.mensajeError!!,

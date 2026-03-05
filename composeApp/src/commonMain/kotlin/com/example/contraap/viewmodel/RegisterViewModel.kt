@@ -24,10 +24,15 @@ class RegisterViewModel : ViewModel() {
     var password by mutableStateOf("")
     var especialidadesSeleccionadas by mutableStateOf(listOf<String>())
 
+    var dpi by mutableStateOf("")
+
     var mostrarDialogo by mutableStateOf(false)
     var mensajeError by mutableStateOf<String?>(null)
     var isLoading by mutableStateOf(false)
     var registroExitoso by mutableStateOf(false)
+
+    var documentoNombre by mutableStateOf<String?>(null)
+    var documentoBytes by mutableStateOf<ByteArray?>(null)
 
     fun onRegister() {
 
@@ -58,6 +63,11 @@ class RegisterViewModel : ViewModel() {
 
         if (especialidadesSeleccionadas.isEmpty()) {
             mensajeError = "Selecciona al menos una especialidad"
+            return
+        }
+
+        if (documentoBytes == null) {
+            mensajeError = "Debes subir tu DPI o RTU"
             return
         }
 

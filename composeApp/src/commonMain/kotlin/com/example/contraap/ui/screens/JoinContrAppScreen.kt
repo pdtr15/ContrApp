@@ -88,6 +88,13 @@ fun JoinContrAppScreen(
                 isPassword = true
             )
 
+            CustomOutlinedTextField(
+                value = viewModel.dpi,
+                onValueChange = { viewModel.dpi = it },
+                label = "DPI",
+                icon = Icons.Default.Person
+            )
+
             if (viewModel.mensajeError != null) {
                 Text(
                     text = viewModel.mensajeError!!,

@@ -30,7 +30,7 @@ fun App() {
 
             NavHost(
                 navController = navController,
-                startDestination = "registerProfesional"
+                startDestination = "onboarding"
             ) {
 
                 composable("onboarding") {

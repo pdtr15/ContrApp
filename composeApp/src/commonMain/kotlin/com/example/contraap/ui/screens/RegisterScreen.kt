@@ -44,16 +44,12 @@ fun RegisterScreen(
     }
 
     val especialidades = listOf(
-        "Servicio de limpieza",
-        "Jardinería",
-        "Electricista",
-        "Plomería",
-        "Mecánico Moto/Carros",
-        "Tutorías",
-        "Pintor",
-        "Línea blanca",
-        "Fumigadores",
-        "Albañilería"
+        "Servicio de limpieza 🧹",
+        "Jardinería 🌿",
+        "Electricista ⚡",
+        "Plomería 🔧",
+        "Pintor 🎨",
+        "Albañilería 🧱"
     )
 
     Scaffold(
@@ -88,19 +84,17 @@ fun RegisterScreen(
                 icon = Icons.Default.Email
             )
 
-            CustomOutlinedTextField(
+            PhoneTextField(
                 value = viewModel.telefono,
                 onValueChange = { viewModel.telefono = it },
                 label = "Teléfono",
                 icon = Icons.Default.Phone
             )
 
-            CustomOutlinedTextField(
+            PasswordTextField(
                 value = viewModel.password,
                 onValueChange = { viewModel.password = it },
-                label = "Contraseña",
-                icon = Icons.Default.Visibility,
-                isPassword = true
+                label = "Contraseña"
             )
 
             CustomDropdownMenu(
@@ -113,11 +107,12 @@ fun RegisterScreen(
                 }
             )
 
-            CustomOutlinedTextField(
+            NumericTextField(
                 value = viewModel.dpi,
                 onValueChange = { viewModel.dpi = it },
                 label = "DPI",
-                icon = Icons.Default.Person
+                icon = Icons.Default.Badge,
+                maxLength = 13
             )
 
             DocumentPickerBox(

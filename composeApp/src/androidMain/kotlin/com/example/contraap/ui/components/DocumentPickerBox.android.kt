@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import java.io.File
 
@@ -35,6 +36,7 @@ actual fun DocumentPickerBox(
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }
     var tempUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingCameraLaunch by remember { mutableStateOf(false) }
 
     fun processUri(uri: Uri, fallback: String) {
         val name = getFileName(context, uri) ?: fallback
@@ -60,9 +62,7 @@ actual fun DocumentPickerBox(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            val uri = createTempUri(context)
-            tempUri = uri
-            cameraLauncher.launch(uri)
+            pendingCameraLaunch = true
         }
     }
 
@@ -70,6 +70,41 @@ actual fun DocumentPickerBox(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) galleryLauncher.launch("image/*")
+    }
+
+    // Lanza la cámara DESPUÉS de que el BottomSheet se cierre
+    LaunchedEffect(showBottomSheet, pendingCameraLaunch) {
+        if (!showBottomSheet && pendingCameraLaunch) {
+            android.util.Log.d("CAMERA_DEBUG", "LaunchedEffect: lanzando cameraLauncher...")
+            pendingCameraLaunch = false
+            try {
+                val uri = createTempUri(context)
+                tempUri = uri
+                android.util.Log.d("CAMERA_DEBUG", "Uri creado: $uri")
+                cameraLauncher.launch(uri)
+                android.util.Log.d("CAMERA_DEBUG", "cameraLauncher.launch() ejecutado")
+            } catch (e: Exception) {
+                android.util.Log.e("CAMERA_DEBUG", "Error: ${e.message}")
+            }
+        }
+    }
+
+    fun openCamera() {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.CAMERA
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        android.util.Log.d("CAMERA_DEBUG", "hasPermission: $hasPermission")
+
+        if (hasPermission) {
+            android.util.Log.d("CAMERA_DEBUG", "Tiene permiso, lanzando camara...")
+            pendingCameraLaunch = true
+            showBottomSheet = false
+        } else {
+            android.util.Log.d("CAMERA_DEBUG", "Sin permiso, pidiendo...")
+            showBottomSheet = false
+            cameraPermission.launch(Manifest.permission.CAMERA)
+        }
     }
 
     Box(
@@ -124,8 +159,7 @@ actual fun DocumentPickerBox(
                     headlineContent = { Text("Tomar foto") },
                     leadingContent = { Icon(Icons.Default.CameraAlt, null) },
                     modifier = Modifier.clickable {
-                        showBottomSheet = false
-                        cameraPermission.launch(Manifest.permission.CAMERA)
+                        openCamera()
                     }
                 )
                 HorizontalDivider()
@@ -156,8 +190,17 @@ actual fun DocumentPickerBox(
 }
 
 private fun createTempUri(context: Context): Uri {
-    val file = File(context.externalCacheDir, "temp_${System.currentTimeMillis()}.jpg")
-    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    val storageDir = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+    val file = File.createTempFile(
+        "temp_${System.currentTimeMillis()}",
+        ".jpg",
+        storageDir
+    )
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
 }
 
 private fun getFileName(context: Context, uri: Uri): String? {
